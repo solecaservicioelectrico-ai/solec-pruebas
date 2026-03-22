@@ -5995,7 +5995,15 @@ async function interpretarConIA(texto,ovRef){
       })
     });
     var data=await resp.json();
-    var rawText=data.candidates[0].content.parts[0].text.trim();
+    console.log('Gemini resp:',JSON.stringify(data).slice(0,300));
+    var rawText='';
+    if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]){
+      rawText=data.candidates[0].content.parts[0].text||'';
+    } else if(data.error){
+      throw new Error('Gemini: '+(data.error.message||JSON.stringify(data.error)));
+    } else {
+      throw new Error('Respuesta inesperada: '+JSON.stringify(data).slice(0,100));
+    }
     rawText=rawText.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(rawText);
     mostrarResumenAsistente(parsed,ovRef);
