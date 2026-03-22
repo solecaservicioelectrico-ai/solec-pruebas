@@ -5985,7 +5985,7 @@ async function interpretarConIA(texto,ovRef){
   box.innerHTML='';box.appendChild(loadDiv);
 
   try{
-    var GEMINI_KEY='AIzaSyC_zNHRyjCANOW72ytLtAPl3COoL9sfIQk';
+    var GEMINI_KEY='AIzaSyD5DI_WaWTPIgnSMaQYG4-IbQpANB4ehfM';
     var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -5995,21 +5995,12 @@ async function interpretarConIA(texto,ovRef){
       })
     });
     var data=await resp.json();
-    console.log('Gemini resp:',JSON.stringify(data).slice(0,300));
-    var rawText='';
-    if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]){
-      rawText=data.candidates[0].content.parts[0].text||'';
-    } else if(data.error){
-      throw new Error('Gemini: '+(data.error.message||JSON.stringify(data.error)));
-    } else {
-      throw new Error('Respuesta inesperada: '+JSON.stringify(data).slice(0,100));
-    }
+    var rawText=data.candidates[0].content.parts[0].text.trim();
     rawText=rawText.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(rawText);
     mostrarResumenAsistente(parsed,ovRef);
   }catch(ex){
-    console.error('Gemini error:',ex,ex.message);
-    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ '+ex.message+'<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
+    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ Error al interpretar. Intentá de nuevo.<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
   }
 }
 
