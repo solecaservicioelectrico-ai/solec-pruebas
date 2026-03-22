@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.8</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.9</span></div>
   </div>
 </div>
 
@@ -5853,7 +5853,7 @@ function abrirAsistente(){
 
   var txtArea=document.createElement('div');
   txtArea.id='asist-txt';
-  txtArea.style.cssText='min-height:80px;background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px;font-size:15px;color:var(--t);margin-bottom:16px;line-height:1.6;';
+  txtArea.style.cssText='min-height:80px;max-height:160px;overflow-y:auto;background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px;font-size:15px;color:var(--t);margin-bottom:16px;line-height:1.6;word-break:break-word;';
   txtArea.textContent='Tocá el micrófono y hablá...';
 
   var btnMicGrande=document.createElement('button');
@@ -5905,10 +5905,13 @@ function toggleGrabacion(txtEl,btnMic,btnProc){
   txtEl.style.color='var(--am)';
   txtEl.textContent='Escuchando...';
   _asistRec.onresult=function(e){
-    var txt='';
-    for(var i=0;i<e.results.length;i++){txt+=e.results[i][0].transcript+' ';}
-    _asistTexto=txt.trim();
-    txtEl.textContent=_asistTexto;
+    var final='';var interim='';
+    for(var i=0;i<e.results.length;i++){
+      if(e.results[i].isFinal){final+=e.results[i][0].transcript+' ';}
+      else{interim+=e.results[i][0].transcript;}
+    }
+    _asistTexto=final.trim();
+    txtEl.textContent=_asistTexto+(interim?' ('+interim+')':'');
   };
   _asistRec.onerror=function(e){
     txtEl.style.color='var(--rojo)';
