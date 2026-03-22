@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.1</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.2</span></div>
   </div>
 </div>
 
@@ -5939,25 +5939,13 @@ function toggleGrabacion(txtEl,btnMic,btnProc){
 }
 
 async function interpretarConIA(texto,ovRef){
-  // Construir catálogo disponible para la IA
-  var catStr='CATEGORÍAS Y COMPONENTES:\n';
-  Object.keys(CATS).forEach(function(k){
-    var c=CATS[k];
-    catStr+='\n'+c.l+' ('+k+'):\n';
-    c.sc.forEach(function(sc){
-      catStr+='  Subcategoría: '+sc+'\n';
-      catStr+='  Eventos: '+Object.keys(c.ev||{}).filter(function(e){return e===sc;}).map(function(e){return (c.ev[e]||[]).join(', ');}).join('')+'\n';
-      catStr+='  Componentes: '+(c.co[sc]||[]).join(', ')+'\n';
-    });
-  });
+  var edificiosStr=edificios.slice(0,30).map(function(e){return e.nombre;}).join(', ');
 
-  var edificiosStr=edificios.slice(0,50).map(function(e){return e.nombre;}).join(', ');
-
-  var prompt='Sos un asistente para electricistas. Analizá este mensaje y extraé la información para llenar un formulario de registro de visita.\n\n'+
-    'MENSAJE DEL TÉCNICO:\n"'+texto+'"\n\n'+
-    'EDIFICIOS DISPONIBLES (elegí el más parecido):\n'+edificiosStr+'\n\n'+
-    catStr+
-    '\nRESPONDÉ SOLO con un JSON con esta estructura exacta (sin texto adicional, sin markdown):\n'+
+  var prompt='Sos asistente de un electricista. Extraé datos del mensaje y respondé SOLO con JSON válido (sin markdown, sin texto extra).\n\n'+
+    'MENSAJE: "'+texto+'"\n\n'+
+    'EDIFICIOS DISPONIBLES: '+edificiosStr+'\n\n'+
+    'CATEGORÍAS: lu=Tomas y Luces, en=Energía, bo=Bombas, se=Seguridad\n\n'+
+    'RESPONDÉ SOLO con este JSON:\n'+
     '{\n'+
     '  "edificio": "nombre exacto del edificio o null",\n'+
     '  "horaLlegada": "HH:MM o null",\n'+
@@ -5995,12 +5983,21 @@ async function interpretarConIA(texto,ovRef){
       })
     });
     var data=await resp.json();
-    var rawText=data.candidates[0].content.parts[0].text.trim();
+    console.log('Gemini resp:',JSON.stringify(data).slice(0,300));
+    var rawText='';
+    if(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]){
+      rawText=data.candidates[0].content.parts[0].text||'';
+    } else if(data.error){
+      throw new Error('Gemini: '+(data.error.message||JSON.stringify(data.error)));
+    } else {
+      throw new Error('Respuesta inesperada: '+JSON.stringify(data).slice(0,100));
+    }
     rawText=rawText.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(rawText);
     mostrarResumenAsistente(parsed,ovRef);
   }catch(ex){
-    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ Error al interpretar. Intentá de nuevo.<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
+    console.error('Gemini error:',ex,ex.message);
+    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ '+ex.message+'<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
   }
 }
 
