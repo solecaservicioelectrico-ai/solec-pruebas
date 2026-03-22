@@ -6000,7 +6000,8 @@ async function interpretarConIA(texto,ovRef){
     var parsed=JSON.parse(rawText);
     mostrarResumenAsistente(parsed,ovRef);
   }catch(ex){
-    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ Error al interpretar. Intentá de nuevo.<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
+    console.error('Gemini error:',ex,ex.message);
+    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ '+ex.message+'<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
   }
 }
 
