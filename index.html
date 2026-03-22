@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.0</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.1</span></div>
   </div>
 </div>
 
@@ -5985,18 +5985,17 @@ async function interpretarConIA(texto,ovRef){
   box.innerHTML='';box.appendChild(loadDiv);
 
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    var GEMINI_KEY='AIzaSyC_zNHRyjCANOW72ytLtAPl3COoL9sfIQk';
+    var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.1,maxOutputTokens:1000}
       })
     });
     var data=await resp.json();
-    var rawText=data.content[0].text.trim();
-    // Limpiar markdown si viene
+    var rawText=data.candidates[0].content.parts[0].text.trim();
     rawText=rawText.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(rawText);
     mostrarResumenAsistente(parsed,ovRef);
