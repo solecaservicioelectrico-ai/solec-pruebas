@@ -440,7 +440,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.3</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.4</span></div>
   </div>
 </div>
 
@@ -6315,7 +6315,7 @@ async function interpretarConIA(texto,ovRef){
       })
     });
     var data=await resp.json();
-    if(data.error){throw new Error('Claude: '+data.error);}
+    if(data.error){throw new Error('Claude: '+(typeof data.error==='object'?JSON.stringify(data.error):data.error));}
     var rawText=data.content&&data.content[0]?data.content[0].text||'':'';
     rawText=rawText.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(rawText);
