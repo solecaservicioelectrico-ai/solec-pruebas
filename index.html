@@ -440,7 +440,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.6</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.7</span></div>
   </div>
 </div>
 
@@ -6320,13 +6320,33 @@ function mostrarConfirmacion(data,ovRef,textoOriginal){
   tit.textContent='✅ SOLEC INTERPRETÓ ESTO';
   box.appendChild(tit);
 
-  // Edificio — buscar el más cercano
+  // Edificio — búsqueda fuzzy por palabras y dirección
   var edifEncontrado=null;
   if(data.edificio){
     var nn=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');};
+    var palabras=nn(data.edificio).split(/\s+/).filter(function(p){return p.length>2;});
+    // Buscar por coincidencia exacta primero
     edifEncontrado=edificios.find(function(e){
-      return nn(e.nombre).indexOf(nn(data.edificio))!==-1||nn(data.edificio).indexOf(nn(e.nombre))!==-1;
+      var en=nn(e.nombre);
+      return en===nn(data.edificio)||en.indexOf(nn(data.edificio))!==-1||nn(data.edificio).indexOf(en)!==-1;
     });
+    // Si no encontró, buscar por palabras clave (número de calle, nombre)
+    if(!edifEncontrado&&palabras.length){
+      edifEncontrado=edificios.find(function(e){
+        var en=nn(e.nombre)+' '+nn(e.dir||'');
+        return palabras.every(function(p){return en.indexOf(p)!==-1;});
+      });
+    }
+    // Si aún no encontró, buscar por cualquier palabra
+    if(!edifEncontrado&&palabras.length){
+      var mejorScore=0;
+      edificios.forEach(function(e){
+        var en=nn(e.nombre)+' '+nn(e.dir||'');
+        var score=palabras.filter(function(p){return en.indexOf(p)!==-1;}).length;
+        if(score>mejorScore){mejorScore=score;edifEncontrado=e;}
+      });
+      if(mejorScore===0)edifEncontrado=null;
+    }
   }
   box.appendChild(seccion('📍','Edificio',edifEncontrado?edifEncontrado.nombre:(data.edificio||null),!!edifEncontrado));
   box.appendChild(seccion('🕐','Hora llegada',data.horaLlegada,!!data.horaLlegada));
@@ -6413,7 +6433,7 @@ function aplicarDatosAsistente(data,edifObj){
     if(chip&&typeof selTipo==='function')selTipo(chip);
     else{tipoVisita=data.tipoVisita;document.querySelectorAll('.chip.cv').forEach(function(c){if(c.dataset.tipo===data.tipoVisita)c.classList.add('on');});}
   }
-  // Intervenciones
+  // Intervenciones — setear datos directamente en ivList
   if(data.intervenciones&&data.intervenciones.length){
     var ivCont=document.getElementById('ivList');
     if(ivCont)ivCont.innerHTML='';
@@ -6421,30 +6441,56 @@ function aplicarDatosAsistente(data,edifObj){
     data.intervenciones.forEach(function(ivData){
       ivCount++;
       var id='iv'+ivCount;
-      ivList.push({id:id,data:{}});
+      // Preparar datos directamente en el objeto
+      var catObj=CATS[ivData.categoria]||CATS['lu'];
+      var comp=ivData.componentes&&ivData.componentes.length?ivData.componentes[0].nombre:'';
+      var qty=ivData.componentes&&ivData.componentes.length?ivData.componentes[0].cantidad||1:1;
+      var ivDataObj={
+        catk:ivData.categoria||'lu',
+        lin:catObj.l,
+        sc:ivData.subcategoria||catObj.sc[0],
+        ev:ivData.evento||'Reemplazo',
+        comp:comp,
+        nota:''
+      };
+      ivList.push({id:id,data:ivDataObj});
+      // Guardar componentes y ubicaciones
+      if(ivData.componentes&&ivData.componentes.length){
+        compMulti[id]=ivData.componentes.map(function(c){return{nombre:c.nombre,qty:c.cantidad||1};});
+      }
+      if(ivData.ubicaciones&&ivData.ubicaciones.length){
+        ubPorIv[id]=ivData.ubicaciones.map(function(u){return{nombre:u.nombre,qty:u.cantidad||1};});
+      }
+      // Construir DOM
       var div=buildIv(ivCount,id);
       if(ivCont)ivCont.appendChild(div);
-      setTimeout((function(ivId,ivD){return function(){
-        var catBtn=document.querySelector('#'+ivId+' [data-catk="'+ivD.categoria+'"]');
+      // Setear campos visuales después de que el DOM esté listo
+      setTimeout((function(ivId,ivD,ivDObj){return function(){
+        // Seleccionar categoría
+        var catBtn=document.querySelector('#'+ivId+' [data-catk="'+ivDObj.catk+'"]');
         if(catBtn)catBtn.click();
         setTimeout(function(){
+          // Subcategoría
           var scSel=document.getElementById(ivId+'-sc');
-          var evSel=document.getElementById(ivId+'-ev');
-          if(scSel&&ivD.subcategoria){for(var i=0;i<scSel.options.length;i++){if(scSel.options[i].value===ivD.subcategoria){scSel.selectedIndex=i;scSel.dispatchEvent(new Event('change'));break;}}}
+          if(scSel&&ivDObj.sc){
+            for(var i=0;i<scSel.options.length;i++){
+              if(scSel.options[i].value===ivDObj.sc){scSel.selectedIndex=i;scSel.dispatchEvent(new Event('change'));break;}
+            }
+          }
           setTimeout(function(){
-            if(evSel&&ivD.evento){for(var i=0;i<evSel.options.length;i++){if(evSel.options[i].value===ivD.evento){evSel.selectedIndex=i;evSel.dispatchEvent(new Event('change'));break;}}}
-            if(ivD.componentes&&ivD.componentes.length){
-              if(!compMulti[ivId])compMulti[ivId]=[];
-              ivD.componentes.forEach(function(c){compMulti[ivId].push({nombre:c.nombre,qty:c.cantidad||1});});
+            // Evento
+            var evSel=document.getElementById(ivId+'-ev');
+            if(evSel&&ivDObj.ev){
+              for(var i=0;i<evSel.options.length;i++){
+                if(evSel.options[i].value===ivDObj.ev){evSel.selectedIndex=i;evSel.dispatchEvent(new Event('change'));break;}
+              }
             }
-            if(ivD.ubicaciones&&ivD.ubicaciones.length){
-              ubPorIv[ivId]=ivD.ubicaciones.map(function(u){return{nombre:u.nombre,qty:u.cantidad||1};});
-              if(typeof rendUb==='function')rendUb(ivId);
-            }
+            // Render ubicaciones y actualizar resumen
+            if(typeof rendUb==='function')rendUb(ivId);
             if(typeof updR==='function')updR(ivId);
-          },300);
-        },300);
-      };})(id,ivData),400);
+          },400);
+        },400);
+      };})(id,ivData,ivDataObj),500);
     });
   }
   // Materiales
