@@ -440,7 +440,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.4</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.5</span></div>
   </div>
 </div>
 
@@ -6154,53 +6154,59 @@ var _asistRec=null;
 var _asistTexto='';
 
 
-function abrirAsistente(){
-  var ov=document.createElement('div');
-  ov.id='asist-ov';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;';
 
+// ── ASISTENTE DE VOZ SOLEC ──────────────────────────────────
+var _asistRec=null;
+var _asistTexto='';
+var _asistState={}; // estado acumulado de la conversación
+
+function abrirAsistente(){
+  _asistTexto='';
+  _asistState={};
+  mostrarPantallaHablar();
+}
+
+function mostrarPantallaHablar(){
+  var ov=document.getElementById('asist-ov');
+  if(ov)document.body.removeChild(ov);
+  ov=document.createElement('div');
+  ov.id='asist-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
 
   var box=document.createElement('div');
-  box.style.cssText='width:100%;max-width:420px;background:#0d1117;border:2px solid #4a9eff;border-radius:20px;padding:24px;';
-
+  box.style.cssText='width:100%;max-width:420px;background:#0d1117;border:2px solid #4a9eff;border-radius:20px;padding:20px;';
 
   var tit=document.createElement('div');
-  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:22px;color:#4a9eff;letter-spacing:3px;text-align:center;margin-bottom:6px;';
+  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:20px;color:#4a9eff;letter-spacing:3px;text-align:center;margin-bottom:6px;';
   tit.textContent='🎤 ASISTENTE SOLEC';
 
-
   var sub=document.createElement('div');
-  sub.style.cssText='font-size:13px;color:var(--t3);text-align:center;margin-bottom:20px;line-height:1.5;';
-  sub.textContent='Contame qué hiciste: edificio, horario, trabajo y materiales.';
-
+  sub.style.cssText='font-size:13px;color:#8b949e;text-align:center;margin-bottom:16px;line-height:1.5;';
+  sub.textContent='Contame qué hiciste: edificio, horario, trabajo realizado y materiales.';
 
   var txtArea=document.createElement('div');
   txtArea.id='asist-txt';
-  txtArea.style.cssText='min-height:80px;max-height:160px;overflow-y:auto;background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px;font-size:15px;color:var(--t);margin-bottom:16px;line-height:1.6;word-break:break-word;';
+  txtArea.style.cssText='min-height:70px;max-height:140px;overflow-y:auto;background:#161b22;border:1px solid #30363d;border-radius:12px;padding:12px;font-size:15px;color:#e8eaf0;margin-bottom:14px;line-height:1.5;word-break:break-word;';
   txtArea.textContent='Tocá el micrófono y hablá...';
-
 
   var btnMicGrande=document.createElement('button');
   btnMicGrande.id='asist-btn-mic';
-  btnMicGrande.style.cssText='width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#16213e);border:3px solid #4a9eff;font-size:36px;cursor:pointer;display:block;margin:0 auto 16px;transition:all .2s;';
+  btnMicGrande.style.cssText='width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#16213e);border:3px solid #4a9eff;font-size:32px;cursor:pointer;display:block;margin:0 auto 14px;';
   btnMicGrande.textContent='🎤';
   btnMicGrande.onclick=function(){toggleGrabacion(txtArea,btnMicGrande,btnProcesar);};
 
-
   var btnProcesar=document.createElement('button');
-  btnProcesar.style.cssText='width:100%;padding:14px;background:#4a9eff;border:none;border-radius:12px;color:#000;font-family:Bebas Neue,sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;margin-bottom:10px;display:none;';
+  btnProcesar.style.cssText='width:100%;padding:13px;background:#4a9eff;border:none;border-radius:12px;color:#000;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;display:none;';
   btnProcesar.textContent='✨ INTERPRETAR';
   btnProcesar.onclick=function(){interpretarConIA(txtArea.textContent,ov);};
 
-
   var btnCerrar=document.createElement('button');
-  btnCerrar.style.cssText='width:100%;padding:12px;background:transparent;border:1px solid #30363d;border-radius:12px;color:var(--t3);font-size:14px;cursor:pointer;';
+  btnCerrar.style.cssText='width:100%;padding:10px;background:transparent;border:1px solid #30363d;border-radius:12px;color:#8b949e;font-size:13px;cursor:pointer;';
   btnCerrar.textContent='Cancelar';
   btnCerrar.onclick=function(){
     if(_asistRec){try{_asistRec.stop();}catch(e){}}
-    document.body.removeChild(ov);
+    if(ov.parentNode)ov.parentNode.removeChild(ov);
   };
-
 
   box.appendChild(tit);box.appendChild(sub);box.appendChild(txtArea);
   box.appendChild(btnMicGrande);box.appendChild(btnProcesar);box.appendChild(btnCerrar);
@@ -6208,13 +6214,9 @@ function abrirAsistente(){
   document.body.appendChild(ov);
 }
 
-
 function toggleGrabacion(txtEl,btnMic,btnProc){
   if(_asistRec&&_asistRec.estado==='grabando'){
     _asistRec.stop();
-    btnMic.style.borderColor='#4a9eff';
-    btnMic.textContent='🎤';
-    if(_asistTexto.trim())btnProc.style.display='block';
     return;
   }
   if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
@@ -6232,21 +6234,17 @@ function toggleGrabacion(txtEl,btnMic,btnProc){
   btnMic.style.borderColor='#ff4757';
   btnMic.style.background='linear-gradient(135deg,#2d0a0a,#1a0505)';
   btnMic.textContent='⏹️';
-  txtEl.style.color='var(--am)';
-  txtEl.textContent='🔴 Escuchando... (hablá y esperá que pare solo)';
+  txtEl.style.color='#f4c542';
+  txtEl.textContent='🔴 Escuchando...';
   _asistRec.onresult=function(e){
     var txt='';
-    for(var i=e.resultIndex;i<e.results.length;i++){
-      txt+=e.results[i][0].transcript;
-    }
+    for(var i=e.resultIndex;i<e.results.length;i++){txt+=e.results[i][0].transcript;}
     _asistTexto=txt.trim();
     txtEl.textContent=_asistTexto;
   };
   _asistRec.onerror=function(e){
-    if(e.error==='no-speech'){
-      txtEl.textContent='No se escuchó nada. Tocá el micrófono y hablá.';
-    } else {
-      txtEl.style.color='var(--rojo)';
+    if(e.error!=='no-speech'){
+      txtEl.style.color='#e63946';
       txtEl.textContent='Error: '+e.error+'. Intentá de nuevo.';
     }
     btnMic.style.borderColor='#4a9eff';
@@ -6258,239 +6256,191 @@ function toggleGrabacion(txtEl,btnMic,btnProc){
     btnMic.style.borderColor='#4a9eff';
     btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
     btnMic.textContent='🎤';
-    txtEl.style.color='var(--t)';
-    if(_asistTexto.trim()){
-      btnProc.style.display='block';
-    }
+    txtEl.style.color='#e8eaf0';
+    if(_asistTexto.trim())btnProc.style.display='block';
   };
   _asistRec.start();
 }
 
-
 async function interpretarConIA(texto,ovRef){
-  var edificiosStr=edificios.slice(0,30).map(function(e){return e.nombre;}).join(', ');
+  var box=ovRef.querySelector('div');
+  box.innerHTML='<div style="text-align:center;padding:20px;color:#4a9eff;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;"><div style="font-size:30px;margin-bottom:10px;">✨</div>INTERPRETANDO...</div>';
 
+  var edificiosStr=edificios.slice(0,40).map(function(e){return e.nombre;}).join(', ');
 
-  var prompt='Sos asistente de un electricista. Extraé datos del mensaje y respondé SOLO con JSON válido (sin markdown, sin texto extra).\n\n'+
+  var prompt='Sos asistente de un electricista en Argentina. Extraé datos del mensaje para un formulario de visita técnica.\n\n'+
     'MENSAJE: "'+texto+'"\n\n'+
     'EDIFICIOS DISPONIBLES: '+edificiosStr+'\n\n'+
-    'CATEGORÍAS: lu=Tomas y Luces, en=Energía, bo=Bombas, se=Seguridad\n\n'+
-    'RESPONDÉ SOLO con este JSON:\n'+
-    '{\n'+
-    '  "edificio": "nombre exacto del edificio o null",\n'+
-    '  "horaLlegada": "HH:MM o null",\n'+
-    '  "horaFin": "HH:MM o null",\n'+
-    '  "tipoVisita": "Preventivo/Abono|Service|Urgencia|Visita técnica o null",\n'+
-    '  "intervenciones": [\n'+
-    '    {\n'+
-    '      "categoria": "clave de categoría (lu/en/bo/se)",\n'+
-    '      "subcategoria": "nombre exacto de subcategoría",\n'+
-    '      "evento": "nombre exacto del evento",\n'+
-    '      "componentes": [{"nombre": "nombre exacto del componente", "cantidad": 1}],\n'+
-    '      "ubicaciones": [{"nombre": "ubicación mencionada", "cantidad": 1}],\n'+
-    '      "modificadores": []\n'+
-    '    }\n'+
-    '  ],\n'+
-    '  "materiales": [{"nombre": "nombre del material", "cantidad": 1, "unidad": "u"}],\n'+
-    '  "observaciones": "cualquier dato extra no estructurado"\n'+
-    '}';
-
-
-  // Mostrar loading
-  var box=ovRef.querySelector('div');
-  var loadDiv=document.createElement('div');
-  loadDiv.style.cssText='text-align:center;padding:20px;color:#4a9eff;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;';
-  loadDiv.innerHTML='<div style="font-size:30px;margin-bottom:10px;">✨</div>INTERPRETANDO...';
-  box.innerHTML='';box.appendChild(loadDiv);
-
+    'TIPOS DE VISITA: Preventivo/Abono, Service, Urgencia, Visita técnica\n'+
+    'CATEGORÍAS: lu=Tomas y Luces, en=Energía, bo=Bombas, se=Seguridad y Com.\n\n'+
+    'Respondé SOLO con JSON válido (sin markdown):\n'+
+    '{"edificio":null,"horaLlegada":null,"horaFin":null,"tipoVisita":null,'+
+    '"intervenciones":[{"categoria":"lu","subcategoria":"Tomas e Iluminación","evento":"Reemplazo","componentes":[{"nombre":"Lampara","cantidad":1}],"ubicaciones":[{"nombre":"Hall","cantidad":1}]}],'+
+    '"materiales":[],"observaciones":null}';
 
   try{
-    // Llamar a Claude via Apps Script proxy
     var resp=await fetch(API+'?sheet=Registros',{
       method:'POST',
       headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({
-        _method:'CLAUDE_PROXY',
-        messages:[{role:'user',content:prompt}]
-      })
+      body:JSON.stringify({_method:'CLAUDE_PROXY',messages:[{role:'user',content:prompt}]})
     });
     var data=await resp.json();
-    if(data.error){throw new Error('Claude: '+(typeof data.error==='object'?JSON.stringify(data.error):data.error));}
+    if(data.error){throw new Error(typeof data.error==='object'?JSON.stringify(data.error):data.error);}
     var rawText=data.content&&data.content[0]?data.content[0].text||'':'';
     rawText=rawText.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(rawText);
-    mostrarResumenAsistente(parsed,ovRef);
+    // Guardar en estado
+    _asistState=parsed;
+    mostrarConfirmacion(parsed,ovRef,texto);
   }catch(ex){
-    console.error('Gemini error:',ex,ex.message);
-    box.innerHTML='<div style="color:var(--rojo);text-align:center;padding:20px;">❌ '+ex.message+'<br><br><button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:10px 20px;color:var(--t);cursor:pointer;">Cerrar</button></div>';
+    box.innerHTML='<div style="color:#e63946;text-align:center;padding:20px;">❌ '+ex.message+'<br><br>'+
+      '<button onclick="mostrarPantallaHablar()" style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px 20px;color:#e8eaf0;cursor:pointer;margin-right:8px;">🎤 Reintentar</button>'+
+      '<button onclick="document.body.removeChild(document.getElementById(\'asist-ov\'))" style="background:transparent;border:1px solid #30363d;border-radius:8px;padding:10px 20px;color:#8b949e;cursor:pointer;">Cerrar</button></div>';
   }
 }
 
-
-function mostrarResumenAsistente(data,ovRef){
+function mostrarConfirmacion(data,ovRef,textoOriginal){
   var box=ovRef.querySelector('div');
   box.innerHTML='';
-  box.style.cssText='width:100%;max-width:420px;background:#0d1117;border:2px solid #4a9eff;border-radius:20px;padding:20px;max-height:85vh;overflow-y:auto;';
+  box.style.cssText='width:100%;max-width:420px;background:#0d1117;border:2px solid #4a9eff;border-radius:20px;padding:18px;max-height:88vh;overflow-y:auto;';
 
-
-  var tit=document.createElement('div');
-  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:18px;color:#4a9eff;letter-spacing:2px;margin-bottom:14px;text-align:center;';
-  tit.textContent='✅ SOLEC ENTENDIÓ ESTO';
-  box.appendChild(tit);
-
-
-  function campo(icono,label,valor,editable){
+  function seccion(icono,label,valor,verde){
     var row=document.createElement('div');
-    row.style.cssText='background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
-    var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:#8b949e;font-weight:800;letter-spacing:1px;margin-bottom:3px;';lbl.textContent=icono+' '+label.toUpperCase();
-    var val=document.createElement('div');val.style.cssText='font-size:15px;font-weight:700;color:'+(valor?'var(--t)':'#8b949e')+';';val.textContent=valor||'— No detectado';
+    row.style.cssText='background:#161b22;border:1px solid '+(verde&&valor?'#2ecc71':'#30363d')+';border-radius:10px;padding:10px 12px;margin-bottom:8px;';
+    var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:'+(verde&&valor?'#2ecc71':'#8b949e')+';font-weight:800;letter-spacing:1px;margin-bottom:3px;';
+    lbl.textContent=icono+' '+label.toUpperCase()+(verde&&valor?' ✓':'');
+    var val=document.createElement('div');val.style.cssText='font-size:14px;font-weight:700;color:'+(valor?'#e8eaf0':'#e63946')+';';
+    val.textContent=valor||'⚠️ No detectado — completar manualmente';
     row.appendChild(lbl);row.appendChild(val);
-    box.appendChild(row);
+    return row;
   }
 
+  var tit=document.createElement('div');
+  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:18px;color:#4a9eff;letter-spacing:2px;text-align:center;margin-bottom:12px;';
+  tit.textContent='✅ SOLEC INTERPRETÓ ESTO';
+  box.appendChild(tit);
 
-  campo('📍','Edificio',data.edificio);
-  campo('🕐','Hora llegada',data.horaLlegada);
-  campo('🕐','Hora fin',data.horaFin);
-  campo('🔧','Tipo de visita',data.tipoVisita);
-
+  // Edificio — buscar el más cercano
+  var edifEncontrado=null;
+  if(data.edificio){
+    var nn=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');};
+    edifEncontrado=edificios.find(function(e){
+      return nn(e.nombre).indexOf(nn(data.edificio))!==-1||nn(data.edificio).indexOf(nn(e.nombre))!==-1;
+    });
+  }
+  box.appendChild(seccion('📍','Edificio',edifEncontrado?edifEncontrado.nombre:(data.edificio||null),!!edifEncontrado));
+  box.appendChild(seccion('🕐','Hora llegada',data.horaLlegada,!!data.horaLlegada));
+  box.appendChild(seccion('🕐','Hora fin',data.horaFin,!!data.horaFin));
+  box.appendChild(seccion('🔧','Tipo de visita',data.tipoVisita,!!data.tipoVisita));
 
   if(data.intervenciones&&data.intervenciones.length){
     data.intervenciones.forEach(function(iv,i){
       var ivDiv=document.createElement('div');
-      ivDiv.style.cssText='background:#161b22;border:1px solid #4a9eff33;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
-      var ivTit=document.createElement('div');ivTit.style.cssText='font-size:11px;color:#4a9eff;font-weight:800;letter-spacing:1px;margin-bottom:6px;';
-      ivTit.textContent='⚡ INTERVENCIÓN '+(i+1)+': '+(CATS[iv.categoria]?CATS[iv.categoria].l:iv.categoria||'');
-      ivDiv.appendChild(ivTit);
-      var ivDet=document.createElement('div');ivDet.style.cssText='font-size:13px;color:var(--t2);line-height:1.7;';
+      ivDiv.style.cssText='background:#161b22;border:1px solid #2ecc7144;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
+      var ivTit=document.createElement('div');ivTit.style.cssText='font-size:10px;color:#2ecc71;font-weight:800;letter-spacing:1px;margin-bottom:5px;';
+      ivTit.textContent='⚡ INTERVENCIÓN '+(i+1)+' ✓';
+      var ivDet=document.createElement('div');ivDet.style.cssText='font-size:13px;color:#e8eaf0;line-height:1.7;';
       var lines=[];
-      if(iv.subcategoria)lines.push('· '+iv.subcategoria);
-      if(iv.evento)lines.push('· '+iv.evento);
-      if(iv.componentes&&iv.componentes.length)lines.push('· Comp: '+iv.componentes.map(function(c){return c.cantidad>1?c.cantidad+'x '+c.nombre:c.nombre;}).join(', '));
-      if(iv.ubicaciones&&iv.ubicaciones.length)lines.push('· Ubic: '+iv.ubicaciones.map(function(u){return u.nombre;}).join(', '));
+      var catNombre=CATS[iv.categoria]?CATS[iv.categoria].l:iv.categoria;
+      lines.push('📂 '+catNombre+(iv.subcategoria?' › '+iv.subcategoria:''));
+      if(iv.evento)lines.push('🔨 '+iv.evento);
+      if(iv.componentes&&iv.componentes.length)lines.push('🔩 '+iv.componentes.map(function(c){return (c.cantidad>1?c.cantidad+'x ':'')+c.nombre;}).join(', '));
+      if(iv.ubicaciones&&iv.ubicaciones.length)lines.push('📍 '+iv.ubicaciones.map(function(u){return u.nombre;}).join(', '));
       ivDet.innerHTML=lines.join('<br>');
-      ivDiv.appendChild(ivDet);
+      ivDiv.appendChild(ivTit);ivDiv.appendChild(ivDet);
       box.appendChild(ivDiv);
     });
+  } else {
+    box.appendChild(seccion('⚡','Intervenciones',null,false));
   }
-
 
   if(data.materiales&&data.materiales.length){
-    var matTxt=data.materiales.map(function(m){return m.cantidad+'x '+m.nombre;}).join(', ');
-    campo('📦','Materiales',matTxt);
+    box.appendChild(seccion('📦','Materiales',data.materiales.map(function(m){return m.cantidad+'x '+m.nombre;}).join(', '),true));
   }
-  if(data.observaciones){campo('📝','Observaciones',data.observaciones);}
+  if(data.observaciones){
+    box.appendChild(seccion('📝','Observaciones',data.observaciones,true));
+  }
 
-
+  // Botones
   var btnConf=document.createElement('button');
-  btnConf.style.cssText='width:100%;padding:14px;background:var(--am);border:none;border-radius:12px;color:#000;font-family:Bebas Neue,sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;margin-top:8px;margin-bottom:8px;';
+  btnConf.style.cssText='width:100%;padding:13px;background:#f4c542;border:none;border-radius:12px;color:#000;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-top:6px;margin-bottom:8px;';
   btnConf.textContent='✅ CONFIRMAR Y LLENAR FORMULARIO';
   btnConf.onclick=function(){
-    document.body.removeChild(ovRef);
-    aplicarDatosAsistente(data);
+    if(ov.parentNode)ov.parentNode.removeChild(ov);
+    aplicarDatosAsistente(data,edifEncontrado);
   };
-
 
   var btnVolver=document.createElement('button');
-  btnVolver.style.cssText='width:100%;padding:12px;background:transparent;border:1px solid #30363d;border-radius:12px;color:#4a9eff;font-size:14px;cursor:pointer;margin-bottom:8px;';
+  btnVolver.style.cssText='width:100%;padding:11px;background:transparent;border:1px solid #4a9eff;border-radius:12px;color:#4a9eff;font-size:14px;cursor:pointer;margin-bottom:8px;';
   btnVolver.textContent='🎤 Volver a hablar';
-  btnVolver.onclick=function(){
-    document.body.removeChild(ovRef);
-    abrirAsistente();
-  };
-
+  btnVolver.onclick=function(){mostrarPantallaHablar();};
 
   var btnCancel=document.createElement('button');
-  btnCancel.style.cssText='width:100%;padding:10px;background:transparent;border:1px solid #30363d;border-radius:12px;color:var(--t3);font-size:13px;cursor:pointer;';
+  btnCancel.style.cssText='width:100%;padding:9px;background:transparent;border:1px solid #30363d;border-radius:12px;color:#8b949e;font-size:13px;cursor:pointer;';
   btnCancel.textContent='Cancelar';
-  btnCancel.onclick=function(){document.body.removeChild(ovRef);};
-
+  btnCancel.onclick=function(){if(ov.parentNode)ov.parentNode.removeChild(ov);};
 
   box.appendChild(btnConf);box.appendChild(btnVolver);box.appendChild(btnCancel);
+  var ov=ovRef;
 }
 
-
-function aplicarDatosAsistente(data){
-  // Hora de llegada
+function aplicarDatosAsistente(data,edifObj){
+  // Hora llegada
   if(data.horaLlegada){
-    var horaEl=document.getElementById('hora');var horaBtn=document.getElementById('horaBtn');
+    var horaEl=document.getElementById('hora');
+    var horaBtn=document.getElementById('horaBtn');
     if(horaEl)horaEl.value=data.horaLlegada;
     if(horaBtn){horaBtn.textContent=data.horaLlegada;horaBtn.style.color='var(--am)';}
   }
   // Hora fin
   if(data.horaFin){
-    var horaFEl=document.getElementById('horaF');var horaFBtn=document.getElementById('horaFBtn');
+    var horaFEl=document.getElementById('horaF');
+    var horaFBtn=document.getElementById('horaFBtn');
     if(horaFEl)horaFEl.value=data.horaFin;
     if(horaFBtn){horaFBtn.textContent=data.horaFin;horaFBtn.style.color='var(--am)';}
-    calcDur&&calcDur();
+    if(typeof calcDur==='function')calcDur();
   }
   // Edificio
-  if(data.edificio){
-    var edif=edificios.find(function(e){
-      return e.nombre.toLowerCase().indexOf(data.edificio.toLowerCase())!==-1||
-             data.edificio.toLowerCase().indexOf(e.nombre.toLowerCase())!==-1;
-    });
-    if(edif){selL(edif);}
-    else{selLfree(data.edificio);}
+  if(edifObj){
+    selL(edifObj);
+  } else if(data.edificio){
+    selLfree(data.edificio);
   }
   // Tipo visita
   if(data.tipoVisita){
     var chip=document.querySelector('.chip.cv[data-tipo="'+data.tipoVisita+'"]');
     if(chip&&typeof selTipo==='function')selTipo(chip);
+    else{tipoVisita=data.tipoVisita;document.querySelectorAll('.chip.cv').forEach(function(c){if(c.dataset.tipo===data.tipoVisita)c.classList.add('on');});}
   }
   // Intervenciones
   if(data.intervenciones&&data.intervenciones.length){
-    // Limpiar intervenciones existentes
     var ivCont=document.getElementById('ivList');
     if(ivCont)ivCont.innerHTML='';
     ivList=[];ivCount=0;compMulti={};ubPorIv={};
-
-
     data.intervenciones.forEach(function(ivData){
       ivCount++;
       var id='iv'+ivCount;
       ivList.push({id:id,data:{}});
       var div=buildIv(ivCount,id);
       if(ivCont)ivCont.appendChild(div);
-
-
       setTimeout((function(ivId,ivD){return function(){
-        // Categoría
         var catBtn=document.querySelector('#'+ivId+' [data-catk="'+ivD.categoria+'"]');
         if(catBtn)catBtn.click();
-
-
         setTimeout(function(){
-          // Subcategoría y evento
           var scSel=document.getElementById(ivId+'-sc');
           var evSel=document.getElementById(ivId+'-ev');
-          if(scSel&&ivD.subcategoria){
-            for(var i=0;i<scSel.options.length;i++){
-              if(scSel.options[i].value===ivD.subcategoria){scSel.selectedIndex=i;scSel.dispatchEvent(new Event('change'));break;}
-            }
-          }
+          if(scSel&&ivD.subcategoria){for(var i=0;i<scSel.options.length;i++){if(scSel.options[i].value===ivD.subcategoria){scSel.selectedIndex=i;scSel.dispatchEvent(new Event('change'));break;}}}
           setTimeout(function(){
-            if(evSel&&ivD.evento){
-              for(var i=0;i<evSel.options.length;i++){
-                if(evSel.options[i].value===ivD.evento){evSel.selectedIndex=i;evSel.dispatchEvent(new Event('change'));break;}
-              }
-            }
-            // Componentes
+            if(evSel&&ivD.evento){for(var i=0;i<evSel.options.length;i++){if(evSel.options[i].value===ivD.evento){evSel.selectedIndex=i;evSel.dispatchEvent(new Event('change'));break;}}}
             if(ivD.componentes&&ivD.componentes.length){
               if(!compMulti[ivId])compMulti[ivId]=[];
-              ivD.componentes.forEach(function(c){
-                compMulti[ivId].push({nombre:c.nombre,qty:c.cantidad||1});
-              });
+              ivD.componentes.forEach(function(c){compMulti[ivId].push({nombre:c.nombre,qty:c.cantidad||1});});
             }
-            // Ubicaciones
             if(ivD.ubicaciones&&ivD.ubicaciones.length){
               ubPorIv[ivId]=ivD.ubicaciones.map(function(u){return{nombre:u.nombre,qty:u.cantidad||1};});
               if(typeof rendUb==='function')rendUb(ivId);
             }
             if(typeof updR==='function')updR(ivId);
-            // Abrir acordeón
-            var biv=document.getElementById(ivId+'-b');var aiv=document.getElementById(ivId+'-ar');
-            if(biv)biv.style.display='block';if(aiv)aiv.style.transform='rotate(90deg)';
           },300);
         },300);
       };})(id,ivData),400);
@@ -6498,26 +6448,26 @@ function aplicarDatosAsistente(data){
   }
   // Materiales
   if(data.materiales&&data.materiales.length){
-    data.materiales.forEach(function(m){
-      matGlobal.push({nombre:m.nombre,qty:m.cantidad||1,un:m.unidad||'u',id:'libre',precio:0});
-    });
+    data.materiales.forEach(function(m){matGlobal.push({nombre:m.nombre,qty:m.cantidad||1,un:m.unidad||'u',id:'libre',precio:0});});
     if(typeof renderMatGlobal==='function')renderMatGlobal();
   }
   // Observaciones
-  if(data.observaciones){
-    var obsEl=document.getElementById('obsgen');
-    if(obsEl)obsEl.value=data.observaciones;
-  }
-  // Abrir pasos
+  if(data.observaciones){var obsEl=document.getElementById('obsgen');if(obsEl)obsEl.value=data.observaciones;}
+  // Abrir todos los pasos
   setTimeout(function(){
-    [1,2,3].forEach(function(n){
+    [1,2,3,4].forEach(function(n){
       var b=document.getElementById('b'+n);var a=document.getElementById('a'+n);var p=document.getElementById('p'+n);
       if(b)b.style.display='block';if(a)a.style.transform='rotate(90deg)';if(p)p.classList.add('on');
     });
+    ivList.forEach(function(iv){
+      var b=document.getElementById(iv.id+'-b');var a=document.getElementById(iv.id+'-ar');
+      if(b)b.style.display='block';if(a)a.style.transform='rotate(90deg)';
+    });
     window.scrollTo(0,0);
-    showToast('✅ Formulario completado por el asistente');
-  },1200);
+    showToast('✅ Formulario completado — verificá y enviá');
+  },1000);
 }
+
 </script>
 <datalist id="pisos-dl">
   <option value="Sótano"><option value="Planta Baja"><option value="Entrepiso">
