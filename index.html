@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SOLEC · Mario</title>
+<title>SOLEC · Mario v4.9</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -205,6 +205,41 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .alerta-form button{background:var(--rojo);border:none;border-radius:var(--rs);padding:10px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;width:100%;margin-top:8px;}
 .hist-empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:15px;font-weight:600;}
 .obra-hdr{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:10px;font-size:13px;color:var(--lila);font-weight:700;}
+
+/* ── PANEL CONFIRMACIÓN EDITABLE ── */
+.conf-overlay{position:fixed;inset:0;background:var(--bg);z-index:8000;overflow-y:auto;display:none;flex-direction:column;}
+.conf-overlay.on{display:flex;}
+.conf-hdr{background:var(--s1);border-bottom:3px solid var(--am);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0;}
+.conf-hdr-tit{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--am);}
+.conf-hdr-sub{font-size:11px;color:var(--t2);font-weight:700;letter-spacing:1px;}
+.conf-body{max-width:600px;margin:0 auto;padding:14px;width:100%;flex:1;}
+.conf-section{background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.conf-section-hdr{background:var(--s2);padding:10px 14px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--am);}
+.conf-row{padding:10px 14px;border-bottom:1px solid var(--borde);display:flex;align-items:flex-start;gap:10px;}
+.conf-row:last-child{border-bottom:none;}
+.conf-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t2);min-width:100px;padding-top:2px;flex-shrink:0;}
+.conf-val{flex:1;font-size:15px;font-weight:700;color:var(--t);line-height:1.4;}
+.conf-edit-btn{background:var(--s3);border:1px solid var(--borde);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--t2);cursor:pointer;flex-shrink:0;letter-spacing:.5px;}
+.conf-edit-btn:active{background:var(--am);border-color:var(--am);color:#000;}
+.conf-inline-inp{width:100%;background:var(--s3);border:1px solid var(--am);border-radius:6px;padding:8px 10px;color:var(--t);font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;outline:none;}
+.conf-inline-sel{width:100%;background:var(--s3);border:1px solid var(--am);border-radius:6px;padding:8px 10px;color:var(--t);font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238890aa' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;}
+.conf-iv-card{background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.conf-iv-hdr{background:var(--s2);padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.conf-iv-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--am);min-width:24px;}
+.conf-iv-sum{flex:1;font-size:13px;font-weight:700;color:var(--t2);}
+.conf-iv-sum.ok{color:var(--t);}
+.conf-iv-body{padding:10px 14px;}
+.conf-iv-field{margin-bottom:10px;}
+.conf-iv-field:last-child{margin-bottom:0;}
+.conf-iv-field label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:5px;}
+.conf-add-iv{width:100%;background:var(--s2);border:2px dashed rgba(245,197,24,.4);border-radius:var(--r);padding:14px;color:var(--am);font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;}
+.conf-add-iv:active{background:rgba(245,197,24,.08);}
+.conf-submit-wrap{padding:14px;position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--borde);}
+.conf-submit{width:100%;background:var(--am);border:none;border-radius:var(--r);padding:18px;color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;}
+.conf-submit:disabled{background:var(--s3);color:var(--t3);cursor:not-allowed;}
+.conf-back{width:100%;background:none;border:1px solid var(--borde);border-radius:var(--r);padding:12px;color:var(--t2);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.conf-edif-wrap{position:relative;width:100%;}
+.conf-edif-dd{position:absolute;top:100%;left:0;right:0;background:var(--s1);border:1px solid var(--am);border-radius:10px;z-index:9999;max-height:200px;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.8);margin-top:3px;}
 
 
 /* ── MODAL CANTIDAD ── */
@@ -678,6 +713,64 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 </div>
 
 
+<!-- PANEL CONFIRMACIÓN EDITABLE -->
+<div class="conf-overlay" id="confOverlay">
+  <div class="conf-hdr">
+    <div><div class="conf-hdr-tit">📋 REVISAR Y ENVIAR</div><div class="conf-hdr-sub">CONFIRMÁ ANTES DE ENVIAR</div></div>
+    <button class="conf-edit-btn" onclick="cerrarConfirmacion()" style="padding:8px 14px;font-size:13px;">✕ VOLVER</button>
+  </div>
+  <div class="conf-body">
+    <!-- Datos generales -->
+    <div class="conf-section">
+      <div class="conf-section-hdr">📍 DATOS GENERALES</div>
+      <div id="confEdifRow" class="conf-row">
+        <span class="conf-lbl">Edificio</span>
+        <div class="conf-val" style="flex:1;">
+          <div class="conf-edif-wrap">
+            <input class="conf-inline-inp" id="confEdifInp" placeholder="Buscar edificio..." autocomplete="off" oninput="onConfEdifInput()" onfocus="onConfEdifInput()">
+            <div class="conf-edif-dd" id="confEdifDd" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="conf-row">
+        <span class="conf-lbl">Tipo visita</span>
+        <div class="conf-val" style="flex:1;">
+          <select class="conf-inline-sel" id="confTipo" onchange="onConfTipoChange()">
+            <option value="Service">Service</option>
+            <option value="Preventivo/Abono">Preventivo/Abono</option>
+            <option value="Urgencia - Dentro de horario">Urgencia — Dentro horario</option>
+            <option value="Urgencia - Fuera de horario">Urgencia — Fuera horario</option>
+            <option value="Obra">Obra</option>
+            <option value="Visita técnica">Visita técnica</option>
+            <option value="Parte">Parte</option>
+          </select>
+        </div>
+      </div>
+      <div class="conf-row">
+        <span class="conf-lbl">Hora llegada</span>
+        <input class="conf-inline-inp" id="confHora" type="time" style="max-width:120px;">
+      </div>
+      <div class="conf-row">
+        <span class="conf-lbl">Hora fin</span>
+        <input class="conf-inline-inp" id="confHoraFin" type="time" style="max-width:120px;">
+      </div>
+    </div>
+    <!-- Intervenciones -->
+    <div class="conf-section">
+      <div class="conf-section-hdr">⚡ INTERVENCIONES</div>
+      <div id="confIvList" style="padding:10px 14px;"></div>
+    </div>
+    <!-- Botón agregar intervención -->
+    <button class="conf-add-iv" onclick="confAgregarIv()">
+      <div style="width:26px;height:26px;background:var(--am);border-radius:50%;color:#000;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;">+</div>
+      AGREGAR INTERVENCIÓN
+    </button>
+  </div>
+  <div class="conf-submit-wrap">
+    <button class="conf-submit" id="confSubmitBtn" onclick="enviarDesdeConfirmacion()">⚡ CONFIRMAR Y ENVIAR</button>
+    <button class="conf-back" onclick="cerrarConfirmacion()">← VOLVER AL FORMULARIO</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 
@@ -5371,15 +5464,319 @@ async function cargarHistorialObra(obraCod){
 
 
 // ---------- CONFIRMACIÓN ENVÍO ----------
+var _confEsFinalizarObra=false;
+
 function confirmarEnvio(){
-  var esObra=tipoVisita==='Obra';
-  var titulo=esObra?'GUARDAR JORNADA':'ENVIAR REGISTRO';
-  var icono=esObra?'🏗️':'📋';
-  var lnom=document.getElementById('lnom').value||document.getElementById('lsearch').value||'';
-  var msg=esObra?
-    'Guardar jornada en '+lnom+'<br>La obra quedará como pendiente':
-    'Enviar registro en '+lnom+'<br>Una vez enviado no se puede modificar';
-  mostrarConfirm(icono,titulo,msg,function(){enviar();});
+  _confEsFinalizarObra=false;
+  abrirPanelConfirmacion();
+}
+
+function finalizarObra(){
+  _confEsFinalizarObra=true;
+  abrirPanelConfirmacion();
+}
+
+// ── PANEL CONFIRMACIÓN EDITABLE ──────────────────────────────────────────────
+
+function abrirPanelConfirmacion(){
+  var ov=document.getElementById('confOverlay');
+  if(!ov)return;
+
+  // Poblar edificio
+  var edifVal=document.getElementById('lnom').value||document.getElementById('lsearch').value||'';
+  document.getElementById('confEdifInp').value=edifVal;
+
+  // Poblar tipo visita
+  var tipoSel=document.getElementById('confTipo');
+  var tipoNorm=(tipoVisita||'').trim();
+  for(var i=0;i<tipoSel.options.length;i++){
+    if(tipoSel.options[i].value===tipoNorm){tipoSel.selectedIndex=i;break;}
+  }
+
+  // Poblar horas
+  document.getElementById('confHora').value=document.getElementById('hora').value||'';
+  var hfinEl=document.getElementById('hfin');
+  document.getElementById('confHoraFin').value=hfinEl?hfinEl.value:'';
+
+  // Poblar intervenciones
+  renderConfIvList();
+
+  // Scroll al top y mostrar
+  ov.scrollTop=0;
+  ov.classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function cerrarConfirmacion(){
+  var ov=document.getElementById('confOverlay');
+  if(ov)ov.classList.remove('on');
+  document.body.style.overflow='';
+}
+
+// ── Edificio dropdown en conf ────────────────────────────────────────────────
+function onConfEdifInput(){
+  var q=nn(document.getElementById('confEdifInp').value||'');
+  var dd=document.getElementById('confEdifDd');
+  if(!q){dd.style.display='none';return;}
+  var res=edificios.filter(function(e){return nn(e.nombre).indexOf(q)!==-1||nn(e.dir).indexOf(q)!==-1;}).slice(0,8);
+  if(!res.length){dd.style.display='none';return;}
+  dd.innerHTML='';
+  res.forEach(function(e){
+    var item=document.createElement('div');item.className='litem';
+    item.innerHTML='<div class="lnom">'+esc(e.nombre)+'</div><div class="ldir">'+esc(e.dir)+'</div>';
+    item.addEventListener('mousedown',function(ev){ev.preventDefault();});
+    item.addEventListener('click',function(){
+      document.getElementById('confEdifInp').value=e.nombre;
+      dd.style.display='none';
+      // Actualizar el formulario principal también
+      selL(e);
+    });
+    dd.appendChild(item);
+  });
+  dd.style.display='block';
+}
+
+document.addEventListener('click',function(e){
+  var dd=document.getElementById('confEdifDd');
+  if(dd&&!dd.contains(e.target)&&e.target.id!=='confEdifInp')dd.style.display='none';
+});
+
+// ── Tipo visita en conf ──────────────────────────────────────────────────────
+function onConfTipoChange(){
+  var val=document.getElementById('confTipo').value;
+  tipoVisita=val;
+  // Actualizar chips en el formulario principal
+  document.querySelectorAll('.chip[data-tipo]').forEach(function(c){c.classList.remove('on');});
+  var chip=document.querySelector('.chip[data-tipo="'+val+'"]');
+  if(chip)chip.classList.add('on');
+}
+
+// ── Render intervenciones en conf ────────────────────────────────────────────
+function getIvResumenConf(iv){
+  var catLabel=iv.data.catk&&CATS[iv.data.catk]?CATS[iv.data.catk].l:(iv.data.catk||'');
+  var sc=iv.data.sc||'';
+  var evEl=document.getElementById(iv.id+'-ev');
+  var ev=evEl?evEl.value:'';
+  var comp='';
+  if(compMulti[iv.id]&&compMulti[iv.id].length>0){
+    comp=compMulti[iv.id].map(function(x){return x.qty>1?x.qty+'x '+x.nombre:x.nombre;}).join(' + ');
+  }else{
+    var coEl=document.getElementById(iv.id+'-co');
+    comp=coEl?coEl.value:'';
+  }
+  var ubArr=ubPorIv[iv.id]||[];
+  var ub=ubArr.map(function(u){return u.nombre+(u.qty>1?' x'+u.qty:'');}).join(', ');
+  return{catLabel:catLabel,sc:sc,ev:ev,comp:comp,ub:ub};
+}
+
+function confIvSummaryText(iv){
+  var d=getIvResumenConf(iv);
+  var parts=[];
+  if(d.ev)parts.push(d.ev);
+  if(d.comp)parts.push(d.comp);
+  if(d.ub)parts.push('📍 '+d.ub);
+  return parts.length?parts.join(' · '):'Sin completar';
+}
+
+function renderConfIvList(){
+  var cont=document.getElementById('confIvList');
+  if(!cont)return;
+  cont.innerHTML='';
+  ivList.forEach(function(iv,idx){
+    var card=renderConfIvCard(iv,idx+1);
+    cont.appendChild(card);
+  });
+}
+
+function renderConfIvCard(iv,num){
+  var d=getIvResumenConf(iv);
+  var card=document.createElement('div');card.className='conf-iv-card';card.id='confCard-'+iv.id;
+
+  var hdr=document.createElement('div');hdr.className='conf-iv-hdr';
+  var numEl=document.createElement('div');numEl.className='conf-iv-num';numEl.textContent=num;
+  var sumEl=document.createElement('div');
+  sumEl.className='conf-iv-sum'+(d.ev?' ok':'');
+  sumEl.textContent=confIvSummaryText(iv);
+  hdr.appendChild(numEl);hdr.appendChild(sumEl);
+
+  var body=document.createElement('div');body.className='conf-iv-body';
+
+  // Categoría
+  var fCat=makeConfIvField('Categoría');
+  var catSel=document.createElement('select');catSel.className='conf-inline-sel';
+  Object.keys(CATS).forEach(function(k){
+    var opt=document.createElement('option');opt.value=k;opt.textContent=CATS[k].l;
+    if(k===iv.data.catk)opt.selected=true;
+    catSel.appendChild(opt);
+  });
+  catSel.addEventListener('change',function(){
+    iv.data.catk=catSel.value;
+    iv.data.sc=CATS[catSel.value].sc[0];
+    iv.data.ev='';
+    // Actualizar SC
+    var scSel=card.querySelector('.conf-sc-sel');
+    if(scSel){
+      scSel.innerHTML='';
+      CATS[catSel.value].sc.forEach(function(s){
+        var o=document.createElement('option');o.value=s;o.textContent=s;
+        if(s===iv.data.sc)o.selected=true;
+        scSel.appendChild(o);
+      });
+      scSel.dispatchEvent(new Event('change'));
+    }
+    refreshConfIvSummary(iv);
+  });
+  fCat.appendChild(catSel);body.appendChild(fCat);
+
+  // Subcategoría
+  var fSc=makeConfIvField('Subcategoría');
+  var scSel=document.createElement('select');scSel.className='conf-inline-sel conf-sc-sel';
+  var catData=CATS[iv.data.catk]||CATS['lu'];
+  catData.sc.forEach(function(s){
+    var opt=document.createElement('option');opt.value=s;opt.textContent=s;
+    if(s===iv.data.sc)opt.selected=true;
+    scSel.appendChild(opt);
+  });
+  scSel.addEventListener('change',function(){
+    iv.data.sc=scSel.value;
+    // Actualizar eventos
+    var evSel2=card.querySelector('.conf-ev-sel');
+    if(evSel2){
+      var catDataNow=CATS[iv.data.catk]||CATS['lu'];
+      evSel2.innerHTML='<option value="">— Evento —</option>';
+      (catDataNow.ev[scSel.value]||[]).forEach(function(v){
+        var o=document.createElement('option');o.value=v;o.textContent=v;
+        if(v===iv.data.ev)o.selected=true;
+        evSel2.appendChild(o);
+      });
+    }
+    refreshConfIvSummary(iv);
+  });
+  fSc.appendChild(scSel);body.appendChild(fSc);
+
+  // Evento
+  var fEv=makeConfIvField('Evento');
+  var evSel=document.createElement('select');evSel.className='conf-inline-sel conf-ev-sel';
+  evSel.innerHTML='<option value="">— Evento —</option>';
+  (catData.ev[iv.data.sc]||[]).forEach(function(v){
+    var opt=document.createElement('option');opt.value=v;opt.textContent=v;
+    if(v===d.ev)opt.selected=true;
+    evSel.appendChild(opt);
+  });
+  evSel.addEventListener('change',function(){
+    // Sincronizar con el select del formulario principal
+    var mainEv=document.getElementById(iv.id+'-ev');
+    if(mainEv){
+      for(var i=0;i<mainEv.options.length;i++){
+        if(mainEv.options[i].value===evSel.value){mainEv.selectedIndex=i;mainEv.dispatchEvent(new Event('change'));break;}
+      }
+    }
+    iv.data.ev=evSel.value;
+    refreshConfIvSummary(iv);
+  });
+  fEv.appendChild(evSel);body.appendChild(fEv);
+
+  // Componente
+  var fCo=makeConfIvField('Componente');
+  var coInp=document.createElement('input');coInp.className='conf-inline-inp';coInp.type='text';
+  coInp.placeholder='Componente...';coInp.value=d.comp;
+  coInp.addEventListener('input',function(){
+    // Actualizar compMulti si existe o el select
+    if(compMulti[iv.id]&&compMulti[iv.id].length>0){
+      compMulti[iv.id]=[{nombre:coInp.value,qty:1}];
+    } else {
+      var coEl2=document.getElementById(iv.id+'-co');
+      if(coEl2){
+        // Verificar si existe esa opción, si no agregar temporalmente
+        var found=false;
+        for(var i=0;i<coEl2.options.length;i++){if(coEl2.options[i].value===coInp.value){coEl2.selectedIndex=i;found=true;break;}}
+        if(!found){var nopt=document.createElement('option');nopt.value=coInp.value;nopt.textContent=coInp.value;coEl2.appendChild(nopt);coEl2.value=coInp.value;}
+      }
+    }
+    refreshConfIvSummary(iv);
+  });
+  fCo.appendChild(coInp);body.appendChild(fCo);
+
+  // Ubicación
+  var fUb=makeConfIvField('Ubicación');
+  var ubArr=ubPorIv[iv.id]||[];
+  var ubVal=ubArr.map(function(u){return u.nombre+(u.qty>1?' x'+u.qty:'');}).join(', ');
+  var ubInp=document.createElement('input');ubInp.className='conf-inline-inp';ubInp.type='text';
+  ubInp.placeholder='Ej: Depto 3A, Hall PB...';ubInp.value=ubVal;
+  ubInp.addEventListener('input',function(){
+    // Parsear texto libre como ubicaciones
+    var raw=ubInp.value.trim();
+    if(raw){
+      ubPorIv[iv.id]=[{nombre:raw,qty:1}];
+    } else {
+      ubPorIv[iv.id]=[];
+    }
+    refreshConfIvSummary(iv);
+  });
+  fUb.appendChild(ubInp);body.appendChild(fUb);
+
+  card.appendChild(hdr);card.appendChild(body);
+  return card;
+}
+
+function makeConfIvField(label){
+  var d=document.createElement('div');d.className='conf-iv-field';
+  var lbl=document.createElement('label');lbl.textContent=label;
+  d.appendChild(lbl);
+  return d;
+}
+
+function refreshConfIvSummary(iv){
+  var card=document.getElementById('confCard-'+iv.id);
+  if(!card)return;
+  var sumEl=card.querySelector('.conf-iv-sum');
+  if(!sumEl)return;
+  var txt=confIvSummaryText(iv);
+  sumEl.textContent=txt;
+  var d=getIvResumenConf(iv);
+  if(d.ev)sumEl.classList.add('ok');else sumEl.classList.remove('ok');
+  // Actualizar también el resumen en el formulario principal
+  updR(iv.id);
+}
+
+// ── Agregar intervención desde conf ─────────────────────────────────────────
+function confAgregarIv(){
+  cerrarConfirmacion();
+  nuevaIv();
+  // Reabrir panel después de que se cree la IV
+  setTimeout(function(){
+    abrirPanelConfirmacion();
+    // Scroll al final del listado de IV en conf
+    var cont=document.getElementById('confIvList');
+    if(cont)cont.lastElementChild&&cont.lastElementChild.scrollIntoView({behavior:'smooth'});
+  },200);
+}
+
+// ── Enviar desde confirmación ────────────────────────────────────────────────
+function enviarDesdeConfirmacion(){
+  // Sincronizar edificio si fue editado
+  var edifVal=document.getElementById('confEdifInp').value.trim();
+  if(edifVal){
+    var matchEdif=edificios.filter(function(e){return e.nombre===edifVal;})[0];
+    if(matchEdif)selL(matchEdif);
+    else{document.getElementById('lnom').value=edifVal;document.getElementById('lsearch').value=edifVal;}
+  }
+  // Sincronizar horas
+  var hOrig=document.getElementById('hora');
+  var hConf=document.getElementById('confHora');
+  if(hConf.value)hOrig.value=hConf.value;
+  var hFinOrig=document.getElementById('hfin');
+  var hFinConf=document.getElementById('confHoraFin');
+  if(hFinOrig&&hFinConf.value)hFinOrig.value=hFinConf.value;
+  // Cerrar panel y enviar
+  cerrarConfirmacion();
+  if(_confEsFinalizarObra){
+    mostrarConfirm('🏁','FINALIZAR OBRA',
+      'Estás por cerrar la obra<br>Esta acción no se puede deshacer',
+      function(){enviar(true);},'var(--lila)');
+  } else {
+    enviar();
+  }
 }
 
 
@@ -6476,24 +6873,40 @@ function aplicarDatosAsistente(data,edifObj){
         var catBtn=document.querySelector('#'+ivId+' [data-catk="'+ivDObj.catk+'"]');
         if(catBtn)catBtn.click();
         setTimeout(function(){
-          // Subcategoría
-          var scSel=document.getElementById(ivId+'-sc');
-          if(scSel&&ivDObj.sc){
-            for(var i=0;i<scSel.options.length;i++){
-              if(scSel.options[i].value===ivDObj.sc){scSel.selectedIndex=i;scSel.dispatchEvent(new Event('change'));break;}
-            }
+          // Subcategoría — es un div con botones .subb, no un select
+          var scCont=document.getElementById(ivId+'-sc');
+          if(scCont&&ivDObj.sc){
+            var nnSc=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();};
+            scCont.querySelectorAll('.subb').forEach(function(btn){
+              if(nnSc(btn.textContent)===nnSc(ivDObj.sc))btn.click();
+            });
           }
           setTimeout(function(){
-            // Evento
+            // Evento — sí es un select
             var evSel=document.getElementById(ivId+'-ev');
             if(evSel&&ivDObj.ev){
+              var nnEv=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();};
               for(var i=0;i<evSel.options.length;i++){
-                if(evSel.options[i].value===ivDObj.ev){evSel.selectedIndex=i;evSel.dispatchEvent(new Event('change'));break;}
+                if(nnEv(evSel.options[i].value)===nnEv(ivDObj.ev)||nnEv(evSel.options[i].text)===nnEv(ivDObj.ev)){
+                  evSel.selectedIndex=i;evSel.dispatchEvent(new Event('change'));break;
+                }
               }
             }
-            // Render ubicaciones y actualizar resumen
-            if(typeof rendUb==='function')rendUb(ivId);
-            if(typeof updR==='function')updR(ivId);
+            setTimeout(function(){
+              // Componente — también es select
+              var coSel=document.getElementById(ivId+'-co');
+              if(coSel&&ivDObj.comp){
+                var nnCo=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();};
+                for(var i=0;i<coSel.options.length;i++){
+                  if(nnCo(coSel.options[i].value)===nnCo(ivDObj.comp)||nnCo(coSel.options[i].text)===nnCo(ivDObj.comp)){
+                    coSel.selectedIndex=i;coSel.dispatchEvent(new Event('change'));break;
+                  }
+                }
+              }
+              // Render ubicaciones y actualizar resumen
+              if(typeof rendUb==='function')rendUb(ivId);
+              if(typeof updR==='function')updR(ivId);
+            },400);
           },400);
         },400);
       };})(id,ivData,ivDataObj),500);
