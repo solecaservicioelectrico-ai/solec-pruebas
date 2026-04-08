@@ -2114,7 +2114,7 @@ function restaurarBorrador(b){
 
     // 5. Tipo visita
     if(b.tipoVisita){
-      var chip=document.querySelector('.chip.cv[data-tipo="'+b.tipoVisita+'"]');
+      var chip=document.querySelector('.chip[data-tipo="'+b.tipoVisita+'"]');
       if(chip&&typeof selTipo==='function'){selTipo(chip);}
       else{tipoVisita=b.tipoVisita;document.querySelectorAll('.chip.cv').forEach(function(c){if(c.dataset.tipo===b.tipoVisita)c.classList.add('on');});}
     }
@@ -6427,11 +6427,17 @@ function aplicarDatosAsistente(data,edifObj){
   } else if(data.edificio){
     selLfree(data.edificio);
   }
-  // Tipo visita
+  // Tipo visita — normalizar por si Claude devuelve variante inesperada
   if(data.tipoVisita){
-    var chip=document.querySelector('.chip.cv[data-tipo="'+data.tipoVisita+'"]');
+    var tiposMap={'service':'Service','correctivo':'Service','reparacion':'Service','reparación':'Service',
+      'preventivo':'Preventivo/Abono','abono':'Preventivo/Abono','preventivo/abono':'Preventivo/Abono',
+      'urgencia':'Urgencia','emergencia':'Urgencia',
+      'visita tecnica':'Visita técnica','visita técnica':'Visita técnica','inspeccion':'Visita técnica','inspección':'Visita técnica'};
+    var tvNorm=tiposMap[data.tipoVisita.toLowerCase()]||data.tipoVisita;
+    var chip=document.querySelector('.chip[data-tipo="'+tvNorm+'"]');
+    console.log('[ASIST] tipoVisita recibido:',data.tipoVisita,'→ normalizado:',tvNorm,'→ chip encontrado:',!!chip);
     if(chip&&typeof selTipo==='function')selTipo(chip);
-    else{tipoVisita=data.tipoVisita;document.querySelectorAll('.chip.cv').forEach(function(c){if(c.dataset.tipo===data.tipoVisita)c.classList.add('on');});}
+    else{tipoVisita=tvNorm;document.querySelectorAll('.chip[data-tipo]').forEach(function(c){if(c.dataset.tipo===tvNorm)c.classList.add('on');});}
   }
   // Intervenciones — setear datos directamente en ivList
   if(data.intervenciones&&data.intervenciones.length){
