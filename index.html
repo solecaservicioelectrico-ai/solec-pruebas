@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SOLEC · Mario v4.13</title>
+<title>SOLEC · Mario v4.15</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -475,7 +475,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.13</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.15</span></div>
   </div>
 </div>
 
@@ -6691,14 +6691,64 @@ async function interpretarConIA(texto,ovRef){
   var box=ovRef.querySelector('div');
   box.innerHTML='<div style="text-align:center;padding:20px;color:#4a9eff;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;"><div style="font-size:30px;margin-bottom:10px;">✨</div>INTERPRETANDO...</div>';
 
-  var edificiosStr=edificios.slice(0,40).map(function(e){return e.nombre;}).join(', ');
+  var edificiosStr=edificios.map(function(e){return e.nombre;}).join(', ');
 
-  var prompt='Sos asistente de un electricista en Argentina. Extraé datos del mensaje para un formulario de visita técnica.\n\n'+
+  var hoy=new Date();
+  var fechaHoy=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
+  var prompt=
+    'Sos asistente de un técnico electricista en Argentina. Tu tarea es extraer datos del mensaje de voz y mapearlos EXACTAMENTE a la estructura del formulario.\n\n'+
+    'FECHA DE HOY: '+fechaHoy+' (usala para calcular fechas relativas como "ayer", "el lunes", etc.)\n'+
     'MENSAJE: "'+texto+'"\n\n'+
-    'EDIFICIOS DISPONIBLES: '+edificiosStr+'\n\n'+
-    'TIPOS DE VISITA: Preventivo/Abono, Service, Urgencia, Visita técnica\n'+
-    'CATEGORÍAS: lu=Tomas y Luces, en=Energía, bo=Bombas, se=Seguridad y Com.\n\n'+
-    'Respondé SOLO con JSON válido (sin markdown):\n'+
+    '════ EDIFICIOS (devolvé el nombre EXACTO de esta lista) ════\n'+
+    edificiosStr+'\n\n'+
+    'REGLA: Buscá el edificio más parecido y devolvé el nombre EXACTAMENTE como figura arriba, sin cambiar ni una letra ni mayúsculas.\n\n'+
+    '════ TIPOS DE VISITA ════\n'+
+    'Service, Preventivo/Abono, Urgencia - Dentro de horario, Urgencia - Fuera de horario, Visita técnica, Obra\n\n'+
+    '════ ESTRUCTURA COMPLETA DEL FORMULARIO ════\n'+
+    'Cada intervención tiene: categoria, subcategoria, evento, componentes[], ubicaciones[]\n\n'+
+    'CATEGORÍA lu = Tomas y Luces\n'+
+    '  Subcategoría "Tomas e Iluminación"\n'+
+    '    Eventos: Reemplazo | Reparación | Instalación nueva | Revisión\n'+
+    '    Componentes: Lampara | Tortuga de LED | Panel o Plafon hasta 24w | Panel o Plafon de 24 a 60w | Tira de LED x mt | Proyector hasta 50w | Proyector mayor a 50w | Llave armada | Modulo electrico | Receptaculo / Portalampara | Colgante Liviano | Colgante Pesado | Aplique simple | Aplique unidireccional / bidireccional | Spot de aplicar o embutir simple o doble | Spot de aplicar o embutir triple o cuadruple | Perfil p/tira de LED x mt | Liston p/tubo simple o doble | Barral riel p/luces x mt | Tacho / Cabezal | Estaca de Jardin | Ventilador de techo | Otro\n'+
+    '  Subcategoría "Control de Luz"\n'+
+    '    Eventos: Reemplazo | Programación/Ajuste | Instalación nueva | Reparación\n'+
+    '    Componentes: Sensor de movimiento | Fotocélula | Automatico de pasillo | Temporizador horario | Pulsador luminoso | Variador de intensidad | Automatico de luces riel din | Otro\n'+
+    '    EJEMPLOS: pulsador, pulsador de luz, pulsador de pasillo → Pulsador luminoso | fotocélula, fotocelula → Fotocélula | sensor, sensor de movimiento → Sensor de movimiento | automático de pasillo, temporizador → Automatico de pasillo\n'+
+    '  Subcategoría "Luces de Emergencia"\n'+
+    '    Eventos: Reemplazo | Prueba de autonomía | Instalación nueva | Reparación\n'+
+    '    Componentes: Luz de emergencia | Batería de emergencia | Toma corriente | Otro\n'+
+    '    IMPORTANTE: luz de emergencia, baliza, emergencia van SIEMPRE aquí, NUNCA en Seguridad\n\n'+
+    'CATEGORÍA en = Energía\n'+
+    '  Subcategoría "Tableros y Montantes"\n'+
+    '    Eventos: Reemplazo | Instalación nueva | Revisión/Ajuste | Reparación | Ampliación\n'+
+    '    Componentes: Térmica bipolar | Disyuntor diferencial bipolar | Disyuntor diferencial tetrapolar | Fusible NH | Contactor | Tablero seccional hasta 8 polos | Otro\n'+
+    '  Subcategoría "Canalización"\n'+
+    '    Eventos: Instalación nueva | Reparación | Ampliación\n'+
+    '    Componentes: Caño a la vista (por boca) | Cañería en mampostería (por boca) | Otro\n\n'+
+    'CATEGORÍA bo = Bombas\n'+
+    '  Subcategoría "Bombas"\n'+
+    '    Eventos: Rotación de bomba | Reemplazo | Reparación | Revisión | Ajuste presostato\n'+
+    '    Componentes: Presostato | Indicador luminoso | Automatico de tanque / cisterna | Guardamotor | Flotante/Nivel | Capacitor | Otro\n'+
+    '  Subcategoría "Tablero"\n'+
+    '    Eventos: Reemplazo | Reparación | Revisión | Instalación nueva\n'+
+    '    Componentes: Tablero bombas | Guardamotor | Relé térmico | Contactor | Fusible NH | Otro\n\n'+
+    'CATEGORÍA se = Seguridad y Com. (SOLO portero, antena y cámaras — NUNCA luces)\n'+
+    '  Subcategoría "Portero Eléctrico"\n'+
+    '    Eventos: Reemplazo | Reparación | Programación | Instalación nueva\n'+
+    '    Componentes: Teléfono de departamento | Frente de calle | Placa microfono / parlante | Amplificador | Pulsador timbre | Apertura eléctrica | Otro\n'+
+    '  Subcategoría "Antena Comunitaria"\n'+
+    '    Eventos: Reemplazo | Reparación | Revisión | Instalación nueva\n'+
+    '    Componentes: Antena | Amplificador | Cable Coaxil | Filtro Balum | Mezclador UHF / VHF | Divisor | Ficha de Compresion | Otro\n'+
+    '  Subcategoría "Cámaras"\n'+
+    '    Eventos: Reemplazo | Configuración | Instalación nueva | Reparación\n'+
+    '    Componentes: Cámara analogica | Camara IP | Balun | DVR | Fuente DVR | Cable UTP | Caja de pase | Monitor | Fuente cámaras | Otro\n\n'+
+    '════ REGLAS DE MAPEO ════\n'+
+    '1. Usá SIEMPRE los nombres exactos de componentes de la lista de arriba\n'+
+    '2. Si mencionan cantidad (ej: "4 lámparas", "dos pulsadores") ponela en cantidad\n'+
+    '3. Si mencionan ubicación (ej: "en el hall", "sala de medidores", "depto 3A") ponela en ubicaciones\n'+
+    '4. Una frase puede tener múltiples intervenciones — creá una por cada trabajo diferente\n'+
+    '5. Si algo no encaja exactamente con los componentes listados, usá "Otro"\n\n'+
+    'Respondé SOLO con JSON válido sin markdown ni texto extra:\n'+
     '{"edificio":null,"horaLlegada":null,"horaFin":null,"tipoVisita":null,'+
     '"intervenciones":[{"categoria":"lu","subcategoria":"Tomas e Iluminación","evento":"Reemplazo","componentes":[{"nombre":"Lampara","cantidad":1}],"ubicaciones":[{"nombre":"Hall","cantidad":1}]}],'+
     '"materiales":[],"observaciones":null}';
@@ -6912,6 +6962,14 @@ function mostrarConfirmacion(data,ovRef,textoOriginal){
       // Intentar match final con lo que escribió
       var q2=nnE(edifInp.value);
       edifEncontrado=edificios.find(function(e){return nnE(e.nombre).indexOf(q2)!==-1||q2.indexOf(nnE(e.nombre))!==-1;})||null;
+    }
+    // Si el edificio es abonado y el tipo es Service → cambiar a Preventivo/Abono
+    if(edifEncontrado){
+      var abonado=(edifEncontrado.abonado||edifEncontrado.Abonado||'').toLowerCase();
+      if((abonado==='si'||abonado==='sí'||abonado==='1'||abonado==='true')&&(data.tipoVisita||'').toLowerCase()==='service'){
+        data.tipoVisita='Preventivo/Abono';
+        tvSel.value='Preventivo/Abono';
+      }
     }
     if(ov.parentNode)ov.parentNode.removeChild(ov);
     aplicarDatosAsistente(data,edifEncontrado);
