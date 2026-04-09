@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SOLEC · Mario v4.12</title>
+<title>SOLEC · Mario v4.13</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -475,7 +475,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.12</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.13</span></div>
   </div>
 </div>
 
@@ -6727,135 +6727,192 @@ async function interpretarConIA(texto,ovRef){
 function mostrarConfirmacion(data,ovRef,textoOriginal){
   var box=ovRef.querySelector('div');
   box.innerHTML='';
-  box.style.cssText='width:100%;max-width:420px;background:#0d1117;border:2px solid #4a9eff;border-radius:20px;padding:18px;max-height:88vh;overflow-y:auto;';
+  box.style.cssText='width:100%;max-width:420px;background:#0d1117;border:2px solid #4a9eff;border-radius:20px;padding:18px;max-height:92vh;overflow-y:auto;';
 
-  function seccion(icono,label,valor,verde){
-    var row=document.createElement('div');
-    row.style.cssText='background:#161b22;border:1px solid '+(verde&&valor?'#2ecc71':'#30363d')+';border-radius:10px;padding:10px 12px;margin-bottom:8px;';
-    var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:'+(verde&&valor?'#2ecc71':'#8b949e')+';font-weight:800;letter-spacing:1px;margin-bottom:3px;';
-    lbl.textContent=icono+' '+label.toUpperCase()+(verde&&valor?' ✓':'');
-    var val=document.createElement('div');val.style.cssText='font-size:14px;font-weight:700;color:'+(valor?'#e8eaf0':'#e63946')+';';
-    val.textContent=valor||'⚠️ No detectado — completar manualmente';
-    row.appendChild(lbl);row.appendChild(val);
-    return row;
+  // ── helpers ──────────────────────────────────────────────────
+  var nnE=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim();};
+
+  function mkLabel(txt,ok){
+    var d=document.createElement('div');
+    d.style.cssText='font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:4px;color:'+(ok?'#2ecc71':'#8b949e')+';';
+    d.textContent=txt+(ok?' ✓':'');
+    return d;
+  }
+  function mkCard(ok){
+    var d=document.createElement('div');
+    d.style.cssText='background:#161b22;border:1px solid '+(ok?'#2ecc71':'#30363d')+';border-radius:10px;padding:10px 12px;margin-bottom:8px;';
+    return d;
+  }
+  function mkInput(val,placeholder){
+    var i=document.createElement('input');
+    i.type='text';i.value=val||'';i.placeholder=placeholder||'';
+    i.style.cssText='width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;color:#e8eaf0;font-size:14px;font-weight:700;outline:none;box-sizing:border-box;margin-top:2px;';
+    i.onfocus=function(){i.style.borderColor='#4a9eff';};
+    i.onblur=function(){i.style.borderColor='#30363d';};
+    return i;
+  }
+  function mkSelect(options,val){
+    var s=document.createElement('select');
+    s.style.cssText='width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;color:#e8eaf0;font-size:14px;font-weight:700;outline:none;margin-top:2px;-webkit-appearance:none;';
+    options.forEach(function(o){
+      var opt=document.createElement('option');opt.value=o;opt.textContent=o;
+      if(o===val)opt.selected=true;
+      s.appendChild(opt);
+    });
+    return s;
   }
 
+  // ── título ────────────────────────────────────────────────────
   var tit=document.createElement('div');
-  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:18px;color:#4a9eff;letter-spacing:2px;text-align:center;margin-bottom:12px;';
+  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:18px;color:#4a9eff;letter-spacing:2px;text-align:center;margin-bottom:4px;';
   tit.textContent='✅ SOLEC INTERPRETÓ ESTO';
-  box.appendChild(tit);
+  var sub=document.createElement('div');
+  sub.style.cssText='font-size:11px;color:#8b949e;text-align:center;margin-bottom:12px;';
+  sub.textContent='Editá lo que necesites antes de confirmar';
+  box.appendChild(tit);box.appendChild(sub);
 
-  // Edificio — búsqueda fuzzy multicapa
+  // ── EDIFICIO con fuzzy + fallback a lista ─────────────────────
   var edifEncontrado=null;
-  var edifCandidatos=[]; // Para mostrar opciones cercanas si no hay exacto
-  if(data.edificio){
-    var nnE=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim();};
+  if(data.edificio&&edificios.length){
     var qraw=nnE(data.edificio);
-    // Equivalencias numéricas: "uno"→"i","I" / "dos"→"ii" etc (para Alfil I, Torre II, etc)
     var numMap={'uno':'i','dos':'ii','tres':'iii','cuatro':'iv','cinco':'v','1':'i','2':'ii','3':'iii','4':'iv','5':'v'};
-    var qwords=qraw.split(/\s+/).filter(function(w){return w.length>0;});
-    var qnorm=qwords.map(function(w){return numMap[w]||w;}).join(' ');
-    // NIVEL 1: coincidencia exacta normalizada
-    edifEncontrado=edificios.find(function(e){return nnE(e.nombre)===qraw||nnE(e.nombre)===qnorm;});
-    // NIVEL 2: el nombre del edificio está contenido en la query o viceversa
+    var qnorm=qraw.split(/\s+/).map(function(w){return numMap[w]||w;}).join(' ');
+    // Nivel 1: exacto
+    edifEncontrado=edificios.find(function(e){var en=nnE(e.nombre);return en===qraw||en===qnorm;});
+    // Nivel 2: contenido
     if(!edifEncontrado){
       edifEncontrado=edificios.find(function(e){
         var en=nnE(e.nombre);
         return en.indexOf(qraw)!==-1||qraw.indexOf(en)!==-1||en.indexOf(qnorm)!==-1||qnorm.indexOf(en)!==-1;
       });
     }
-    // NIVEL 3: scoring por palabras — cada palabra de la query que aparece en nombre+dirección suma 1 punto
-    // Las palabras del nombre del edificio que aparecen en la query suman 2 puntos (más importantes)
+    // Nivel 3: scoring
     if(!edifEncontrado){
       var scored=edificios.map(function(e){
-        var en=nnE(e.nombre);
-        var ed=nnE(e.dir||'');
-        var enWords=en.split(/\s+/).filter(function(w){return w.length>1;});
-        var qw=qnorm.split(/\s+/).filter(function(w){return w.length>1;});
+        var en=nnE(e.nombre),ed=nnE(e.dir||'');
         var score=0;
-        // Palabras del edificio que aparecen en la query
-        enWords.forEach(function(w){if(qnorm.indexOf(w)!==-1)score+=2;});
-        // Palabras de la query que aparecen en nombre o dirección
-        qw.forEach(function(w){if(en.indexOf(w)!==-1||ed.indexOf(w)!==-1)score+=1;});
+        en.split(/\s+/).filter(function(w){return w.length>1;}).forEach(function(w){if(qnorm.indexOf(w)!==-1)score+=2;});
+        qnorm.split(/\s+/).filter(function(w){return w.length>1;}).forEach(function(w){if(en.indexOf(w)!==-1||ed.indexOf(w)!==-1)score+=1;});
         return{e:e,score:score};
       }).filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;});
-      if(scored.length){
-        edifEncontrado=scored[0].e;
-        // Guardar los primeros 4 como candidatos para mostrar si el score es bajo
-        edifCandidatos=scored.slice(0,4).map(function(x){return x.e;});
-        // Si el mejor score es muy bajo (1 punto), no confirmar automáticamente
-        if(scored[0].score<=1){edifEncontrado=null;}
-      }
+      if(scored.length&&scored[0].score>1)edifEncontrado=scored[0].e;
     }
   }
-  // Mostrar edificio encontrado o candidatos
-  if(edifEncontrado){
-    box.appendChild(seccion('📍','Edificio',edifEncontrado.nombre,true));
-  } else if(data.edificio){
-    // No encontrado — mostrar campo rojo + lista de candidatos clicables
-    var edifRow=document.createElement('div');
-    edifRow.style.cssText='background:#161b22;border:1px solid #e63946;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
-    var edifLbl=document.createElement('div');edifLbl.style.cssText='font-size:10px;color:#e63946;font-weight:800;letter-spacing:1px;margin-bottom:4px;';
-    edifLbl.textContent='📍 EDIFICIO — no encontrado exacto';
-    var edifVal=document.createElement('div');edifVal.style.cssText='font-size:13px;color:#e63946;margin-bottom:8px;';
-    edifVal.textContent='"'+data.edificio+'" — elegí uno:';
-    edifRow.appendChild(edifLbl);edifRow.appendChild(edifVal);
-    var candidatosParaMostrar=edifCandidatos.length?edifCandidatos:edificios.slice(0,6);
-    candidatosParaMostrar.forEach(function(e){
-      var btn=document.createElement('button');
-      btn.style.cssText='display:block;width:100%;text-align:left;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:8px 10px;color:#e8eaf0;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:5px;';
-      btn.textContent=e.nombre+(e.dir?' · '+e.dir:'');
-      btn.addEventListener('click',function(){
-        edifEncontrado=e;
-        // Resaltar seleccionado
-        edifRow.querySelectorAll('button').forEach(function(b){b.style.borderColor='#30363d';b.style.color='#e8eaf0';});
-        btn.style.borderColor='#2ecc71';btn.style.color='#2ecc71';
-        edifLbl.textContent='📍 EDIFICIO ✓';edifLbl.style.color='#2ecc71';
-        edifVal.textContent=e.nombre;edifVal.style.color='#e8eaf0';
-      });
-      edifRow.appendChild(btn);
-    });
-    box.appendChild(edifRow);
-  } else {
-    box.appendChild(seccion('📍','Edificio',null,false));
-  }
-  box.appendChild(seccion('🕐','Hora llegada',data.horaLlegada,!!data.horaLlegada));
-  box.appendChild(seccion('🕐','Hora fin',data.horaFin,!!data.horaFin));
-  box.appendChild(seccion('🔧','Tipo de visita',data.tipoVisita,!!data.tipoVisita));
 
-  if(data.intervenciones&&data.intervenciones.length){
-    data.intervenciones.forEach(function(iv,i){
-      var ivDiv=document.createElement('div');
-      ivDiv.style.cssText='background:#161b22;border:1px solid #2ecc7144;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
-      var ivTit=document.createElement('div');ivTit.style.cssText='font-size:10px;color:#2ecc71;font-weight:800;letter-spacing:1px;margin-bottom:5px;';
-      ivTit.textContent='⚡ INTERVENCIÓN '+(i+1)+' ✓';
-      var ivDet=document.createElement('div');ivDet.style.cssText='font-size:13px;color:#e8eaf0;line-height:1.7;';
-      var lines=[];
-      var catNombre=CATS[iv.categoria]?CATS[iv.categoria].l:iv.categoria;
-      lines.push('📂 '+catNombre+(iv.subcategoria?' › '+iv.subcategoria:''));
-      if(iv.evento)lines.push('🔨 '+iv.evento);
-      if(iv.componentes&&iv.componentes.length)lines.push('🔩 '+iv.componentes.map(function(c){return (c.cantidad>1?c.cantidad+'x ':'')+c.nombre;}).join(', '));
-      if(iv.ubicaciones&&iv.ubicaciones.length)lines.push('📍 '+iv.ubicaciones.map(function(u){return u.nombre;}).join(', '));
-      ivDet.innerHTML=lines.join('<br>');
-      ivDiv.appendChild(ivTit);ivDiv.appendChild(ivDet);
-      box.appendChild(ivDiv);
+  // Campo edificio editable con dropdown
+  var edifCard=mkCard(!!edifEncontrado);
+  edifCard.appendChild(mkLabel('📍 EDIFICIO',!!edifEncontrado));
+  var edifInpWrap=document.createElement('div');edifInpWrap.style.position='relative';
+  var edifInp=mkInput(edifEncontrado?edifEncontrado.nombre:(data.edificio||''),'Escribí para buscar...');
+  var edifDD=document.createElement('div');
+  edifDD.style.cssText='display:none;position:absolute;top:100%;left:0;right:0;background:#161b22;border:1px solid #4a9eff;border-radius:8px;z-index:9999;max-height:180px;overflow-y:auto;margin-top:2px;box-shadow:0 8px 24px rgba(0,0,0,.8);';
+  function renderEdifDD(q){
+    edifDD.innerHTML='';
+    var res=q?edificios.filter(function(e){return nnE(e.nombre).indexOf(nnE(q))!==-1||nnE(e.dir||'').indexOf(nnE(q))!==-1;}).slice(0,8):edificios.slice(0,8);
+    if(!res.length){edifDD.style.display='none';return;}
+    res.forEach(function(e){
+      var row=document.createElement('div');
+      row.style.cssText='padding:9px 12px;cursor:pointer;border-bottom:1px solid #30363d;font-size:13px;font-weight:700;color:#e8eaf0;';
+      row.textContent=e.nombre+(e.dir?' · '+e.dir:'');
+      row.onmousedown=function(ev){ev.preventDefault();};
+      row.onclick=function(){
+        edifEncontrado=e;edifInp.value=e.nombre;
+        edifDD.style.display='none';
+        edifCard.style.borderColor='#2ecc71';
+        edifCard.querySelector('div').style.color='#2ecc71';
+        edifCard.querySelector('div').textContent='📍 EDIFICIO ✓';
+      };
+      edifDD.appendChild(row);
+    });
+    edifDD.style.display='block';
+  }
+  edifInp.oninput=function(){edifEncontrado=null;renderEdifDD(edifInp.value);};
+  edifInp.onfocus=function(){edifInp.style.borderColor='#4a9eff';renderEdifDD(edifInp.value);};
+  edifInp.onblur=function(){edifInp.style.borderColor='#30363d';setTimeout(function(){edifDD.style.display='none';},200);};
+  edifInpWrap.appendChild(edifInp);edifInpWrap.appendChild(edifDD);
+  edifCard.appendChild(edifInpWrap);
+  box.appendChild(edifCard);
+
+  // ── HORA LLEGADA editable ────────────────────────────────────
+  var hLlegCard=mkCard(!!data.horaLlegada);
+  hLlegCard.appendChild(mkLabel('🕐 HORA LLEGADA',!!data.horaLlegada));
+  var hLlegInp=mkInput(data.horaLlegada||'','15:30');hLlegInp.type='time';
+  hLlegCard.appendChild(hLlegInp);box.appendChild(hLlegCard);
+
+  // ── HORA FIN editable ────────────────────────────────────────
+  var hFinCard=mkCard(!!data.horaFin);
+  hFinCard.appendChild(mkLabel('🕐 HORA FIN',!!data.horaFin));
+  var hFinInp=mkInput(data.horaFin||'','17:00');hFinInp.type='time';
+  hFinCard.appendChild(hFinInp);box.appendChild(hFinCard);
+
+  // ── TIPO VISITA editable ─────────────────────────────────────
+  var tvCard=mkCard(!!data.tipoVisita);
+  tvCard.appendChild(mkLabel('🔧 TIPO DE VISITA',!!data.tipoVisita));
+  var tvSel=mkSelect(['Service','Preventivo/Abono','Urgencia - Dentro de horario','Urgencia - Fuera de horario','Visita técnica','Obra','Parte'],data.tipoVisita||'Service');
+  tvCard.appendChild(tvSel);box.appendChild(tvCard);
+
+  // ── INTERVENCIONES editables ─────────────────────────────────
+  var ivEditData=data.intervenciones?JSON.parse(JSON.stringify(data.intervenciones)):[];
+  if(ivEditData.length){
+    ivEditData.forEach(function(iv,i){
+      var ivCard=mkCard(true);
+      ivCard.appendChild(mkLabel('⚡ INTERVENCIÓN '+(i+1),true));
+      // Categoría
+      var catNombre=CATS[iv.categoria]?CATS[iv.categoria].l:(iv.categoria||'');
+      var catSel=mkSelect(Object.keys(CATS).map(function(k){return CATS[k].l;}).concat(['Otro']),catNombre);
+      var scInp=mkInput(iv.subcategoria||'','Subcategoría');
+      var evInp=mkInput(iv.evento||'','Evento (ej: Reemplazo)');
+      var coInp=mkInput(iv.componentes&&iv.componentes.length?iv.componentes.map(function(c){return(c.cantidad>1?c.cantidad+'x ':'')+c.nombre;}).join(', '):'','Componente');
+      var ubInp=mkInput(iv.ubicaciones&&iv.ubicaciones.length?iv.ubicaciones.map(function(u){return u.nombre;}).join(', '):'','Ubicación (ej: Hall, Depto 3A)');
+      // Sync edits back al objeto
+      catSel.onchange=function(){
+        var k=Object.keys(CATS).find(function(k){return CATS[k].l===catSel.value;});
+        if(k)iv.categoria=k;
+      };
+      scInp.oninput=function(){iv.subcategoria=scInp.value;};
+      evInp.oninput=function(){iv.evento=evInp.value;};
+      coInp.oninput=function(){iv.componentes=[{nombre:coInp.value,cantidad:1}];};
+      ubInp.oninput=function(){iv.ubicaciones=[{nombre:ubInp.value,cantidad:1}];};
+      var lSc=document.createElement('div');lSc.style.cssText='font-size:10px;color:#8b949e;margin-top:6px;margin-bottom:2px;';lSc.textContent='Subcategoría';
+      var lEv=document.createElement('div');lEv.style.cssText='font-size:10px;color:#8b949e;margin-top:6px;margin-bottom:2px;';lEv.textContent='Evento';
+      var lCo=document.createElement('div');lCo.style.cssText='font-size:10px;color:#8b949e;margin-top:6px;margin-bottom:2px;';lCo.textContent='Componente';
+      var lUb=document.createElement('div');lUb.style.cssText='font-size:10px;color:#8b949e;margin-top:6px;margin-bottom:2px;';lUb.textContent='Ubicación';
+      ivCard.appendChild(catSel);
+      ivCard.appendChild(lSc);ivCard.appendChild(scInp);
+      ivCard.appendChild(lEv);ivCard.appendChild(evInp);
+      ivCard.appendChild(lCo);ivCard.appendChild(coInp);
+      ivCard.appendChild(lUb);ivCard.appendChild(ubInp);
+      box.appendChild(ivCard);
     });
   } else {
-    box.appendChild(seccion('⚡','Intervenciones',null,false));
+    var noIv=mkCard(false);
+    noIv.appendChild(mkLabel('⚡ INTERVENCIONES',false));
+    var noIvTxt=document.createElement('div');noIvTxt.style.cssText='font-size:13px;color:#e63946;';noIvTxt.textContent='No detectadas — completá en el formulario';
+    noIv.appendChild(noIvTxt);box.appendChild(noIv);
   }
 
-  if(data.materiales&&data.materiales.length){
-    box.appendChild(seccion('📦','Materiales',data.materiales.map(function(m){return m.cantidad+'x '+m.nombre;}).join(', '),true));
-  }
   if(data.observaciones){
-    box.appendChild(seccion('📝','Observaciones',data.observaciones,true));
+    var obsCard=mkCard(true);
+    obsCard.appendChild(mkLabel('📝 OBSERVACIONES',true));
+    var obsTxt=document.createElement('div');obsTxt.style.cssText='font-size:13px;color:#e8eaf0;';obsTxt.textContent=data.observaciones;
+    obsCard.appendChild(obsTxt);box.appendChild(obsCard);
   }
 
-  // Botones
+  // ── BOTONES ───────────────────────────────────────────────────
   var btnConf=document.createElement('button');
-  btnConf.style.cssText='width:100%;padding:13px;background:#f4c542;border:none;border-radius:12px;color:#000;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-top:6px;margin-bottom:8px;';
+  btnConf.style.cssText='width:100%;padding:13px;background:#f4c542;border:none;border-radius:12px;color:#000;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-top:8px;margin-bottom:8px;';
   btnConf.textContent='✅ CONFIRMAR Y LLENAR FORMULARIO';
   btnConf.onclick=function(){
+    // Leer valores editados
+    data.horaLlegada=hLlegInp.value||data.horaLlegada;
+    data.horaFin=hFinInp.value||data.horaFin;
+    data.tipoVisita=tvSel.value||data.tipoVisita;
+    data.intervenciones=ivEditData;
+    if(!edifEncontrado&&edifInp.value){
+      // Intentar match final con lo que escribió
+      var q2=nnE(edifInp.value);
+      edifEncontrado=edificios.find(function(e){return nnE(e.nombre).indexOf(q2)!==-1||q2.indexOf(nnE(e.nombre))!==-1;})||null;
+    }
     if(ov.parentNode)ov.parentNode.removeChild(ov);
     aplicarDatosAsistente(data,edifEncontrado);
   };
@@ -6873,6 +6930,7 @@ function mostrarConfirmacion(data,ovRef,textoOriginal){
   box.appendChild(btnConf);box.appendChild(btnVolver);box.appendChild(btnCancel);
   var ov=ovRef;
 }
+
 
 function aplicarDatosAsistente(data,edifObj){
   // Hora llegada
