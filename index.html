@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SOLEC · Mario v4.10</title>
+<title>SOLEC · Mario v4.11</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -475,7 +475,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.10</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.11</span></div>
   </div>
 </div>
 
@@ -6623,38 +6623,42 @@ function toggleGrabacion(txtEl,btnMic,btnProc){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   _asistRec=new SR();
   _asistRec.lang='es-AR';
-  _asistRec.continuous=false;
+  _asistRec.continuous=true;
   _asistRec.interimResults=true;
   _asistRec.maxAlternatives=1;
   _asistRec.estado='grabando';
   _asistTexto='';
   btnMic.style.borderColor='#ff4757';
   btnMic.style.background='linear-gradient(135deg,#2d0a0a,#1a0505)';
-  btnMic.textContent='⏹️';
+  btnMic.innerHTML='⏹️<span style="display:block;font-size:11px;letter-spacing:1px;margin-top:4px;">DETENER</span>';
   txtEl.style.color='#f4c542';
-  txtEl.textContent='🔴 Escuchando...';
+  txtEl.textContent='🔴 Escuchando... hablá todo lo que quieras y después tocá DETENER';
   _asistRec.onresult=function(e){
     var txt='';
-    for(var i=e.resultIndex;i<e.results.length;i++){txt+=e.results[i][0].transcript;}
+    for(var i=0;i<e.results.length;i++){txt+=e.results[i][0].transcript+' ';}
     _asistTexto=txt.trim();
     txtEl.textContent=_asistTexto;
   };
   _asistRec.onerror=function(e){
-    if(e.error!=='no-speech'){
-      txtEl.style.color='#e63946';
-      txtEl.textContent='Error: '+e.error+'. Intentá de nuevo.';
-    }
+    if(e.error==='no-speech')return; // ignorar silencio — continuous sigue
+    txtEl.style.color='#e63946';
+    txtEl.textContent='Error: '+e.error+'. Intentá de nuevo.';
     btnMic.style.borderColor='#4a9eff';
     btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
-    btnMic.textContent='🎤';
+    btnMic.innerHTML='🎤';
   };
   _asistRec.onend=function(){
-    _asistRec.estado='detenido';
-    btnMic.style.borderColor='#4a9eff';
-    btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
-    btnMic.textContent='🎤';
-    txtEl.style.color='#e8eaf0';
-    if(_asistTexto.trim())btnProc.style.display='block';
+    // Solo detener UI si fue detenido manualmente (no reiniciar automático)
+    if(_asistRec.estado==='detenido'){
+      btnMic.style.borderColor='#4a9eff';
+      btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
+      btnMic.innerHTML='🎤';
+      txtEl.style.color='#e8eaf0';
+      if(_asistTexto.trim())btnProc.style.display='block';
+    } else if(_asistRec.estado==='grabando'){
+      // El browser cortó solo (ej: timeout interno) — reiniciar automáticamente
+      try{_asistRec.start();}catch(ex){}
+    }
   };
   _asistRec.start();
 }
@@ -6717,37 +6721,80 @@ function mostrarConfirmacion(data,ovRef,textoOriginal){
   tit.textContent='✅ SOLEC INTERPRETÓ ESTO';
   box.appendChild(tit);
 
-  // Edificio — búsqueda fuzzy por palabras y dirección
+  // Edificio — búsqueda fuzzy multicapa
   var edifEncontrado=null;
+  var edifCandidatos=[]; // Para mostrar opciones cercanas si no hay exacto
   if(data.edificio){
-    var nn=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');};
-    // Filtrar solo artículos y preposiciones muy cortas (1 letra)
-    var stopWords={'de':1,'la':1,'el':1,'en':1,'y':1,'a':1,'e':1,'i':1,'o':1,'u':1};
-    var palabras=nn(data.edificio).split(/\s+/).filter(function(p){return p.length>1&&!stopWords[p];});
-    // Buscar por coincidencia exacta primero
-    edifEncontrado=edificios.find(function(e){
-      var en=nn(e.nombre);
-      return en===nn(data.edificio)||en.indexOf(nn(data.edificio))!==-1||nn(data.edificio).indexOf(en)!==-1;
-    });
-    // Si no encontró, buscar por palabras clave (número de calle, nombre)
-    if(!edifEncontrado&&palabras.length){
+    var nnE=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim();};
+    var qraw=nnE(data.edificio);
+    // Equivalencias numéricas: "uno"→"i","I" / "dos"→"ii" etc (para Alfil I, Torre II, etc)
+    var numMap={'uno':'i','dos':'ii','tres':'iii','cuatro':'iv','cinco':'v','1':'i','2':'ii','3':'iii','4':'iv','5':'v'};
+    var qwords=qraw.split(/\s+/).filter(function(w){return w.length>0;});
+    var qnorm=qwords.map(function(w){return numMap[w]||w;}).join(' ');
+    // NIVEL 1: coincidencia exacta normalizada
+    edifEncontrado=edificios.find(function(e){return nnE(e.nombre)===qraw||nnE(e.nombre)===qnorm;});
+    // NIVEL 2: el nombre del edificio está contenido en la query o viceversa
+    if(!edifEncontrado){
       edifEncontrado=edificios.find(function(e){
-        var en=nn(e.nombre)+' '+nn(e.dir||'');
-        return palabras.every(function(p){return en.indexOf(p)!==-1;});
+        var en=nnE(e.nombre);
+        return en.indexOf(qraw)!==-1||qraw.indexOf(en)!==-1||en.indexOf(qnorm)!==-1||qnorm.indexOf(en)!==-1;
       });
     }
-    // Si aún no encontró, buscar por cualquier palabra
-    if(!edifEncontrado&&palabras.length){
-      var mejorScore=0;
-      edificios.forEach(function(e){
-        var en=nn(e.nombre)+' '+nn(e.dir||'');
-        var score=palabras.filter(function(p){return en.indexOf(p)!==-1;}).length;
-        if(score>mejorScore){mejorScore=score;edifEncontrado=e;}
-      });
-      if(mejorScore===0)edifEncontrado=null;
+    // NIVEL 3: scoring por palabras — cada palabra de la query que aparece en nombre+dirección suma 1 punto
+    // Las palabras del nombre del edificio que aparecen en la query suman 2 puntos (más importantes)
+    if(!edifEncontrado){
+      var scored=edificios.map(function(e){
+        var en=nnE(e.nombre);
+        var ed=nnE(e.dir||'');
+        var enWords=en.split(/\s+/).filter(function(w){return w.length>1;});
+        var qw=qnorm.split(/\s+/).filter(function(w){return w.length>1;});
+        var score=0;
+        // Palabras del edificio que aparecen en la query
+        enWords.forEach(function(w){if(qnorm.indexOf(w)!==-1)score+=2;});
+        // Palabras de la query que aparecen en nombre o dirección
+        qw.forEach(function(w){if(en.indexOf(w)!==-1||ed.indexOf(w)!==-1)score+=1;});
+        return{e:e,score:score};
+      }).filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;});
+      if(scored.length){
+        edifEncontrado=scored[0].e;
+        // Guardar los primeros 4 como candidatos para mostrar si el score es bajo
+        edifCandidatos=scored.slice(0,4).map(function(x){return x.e;});
+        // Si el mejor score es muy bajo (1 punto), no confirmar automáticamente
+        if(scored[0].score<=1){edifEncontrado=null;}
+      }
     }
   }
-  box.appendChild(seccion('📍','Edificio',edifEncontrado?edifEncontrado.nombre:(data.edificio||null),!!edifEncontrado));
+  // Mostrar edificio encontrado o candidatos
+  if(edifEncontrado){
+    box.appendChild(seccion('📍','Edificio',edifEncontrado.nombre,true));
+  } else if(data.edificio){
+    // No encontrado — mostrar campo rojo + lista de candidatos clicables
+    var edifRow=document.createElement('div');
+    edifRow.style.cssText='background:#161b22;border:1px solid #e63946;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
+    var edifLbl=document.createElement('div');edifLbl.style.cssText='font-size:10px;color:#e63946;font-weight:800;letter-spacing:1px;margin-bottom:4px;';
+    edifLbl.textContent='📍 EDIFICIO — no encontrado exacto';
+    var edifVal=document.createElement('div');edifVal.style.cssText='font-size:13px;color:#e63946;margin-bottom:8px;';
+    edifVal.textContent='"'+data.edificio+'" — elegí uno:';
+    edifRow.appendChild(edifLbl);edifRow.appendChild(edifVal);
+    var candidatosParaMostrar=edifCandidatos.length?edifCandidatos:edificios.slice(0,6);
+    candidatosParaMostrar.forEach(function(e){
+      var btn=document.createElement('button');
+      btn.style.cssText='display:block;width:100%;text-align:left;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:8px 10px;color:#e8eaf0;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:5px;';
+      btn.textContent=e.nombre+(e.dir?' · '+e.dir:'');
+      btn.addEventListener('click',function(){
+        edifEncontrado=e;
+        // Resaltar seleccionado
+        edifRow.querySelectorAll('button').forEach(function(b){b.style.borderColor='#30363d';b.style.color='#e8eaf0';});
+        btn.style.borderColor='#2ecc71';btn.style.color='#2ecc71';
+        edifLbl.textContent='📍 EDIFICIO ✓';edifLbl.style.color='#2ecc71';
+        edifVal.textContent=e.nombre;edifVal.style.color='#e8eaf0';
+      });
+      edifRow.appendChild(btn);
+    });
+    box.appendChild(edifRow);
+  } else {
+    box.appendChild(seccion('📍','Edificio',null,false));
+  }
   box.appendChild(seccion('🕐','Hora llegada',data.horaLlegada,!!data.horaLlegada));
   box.appendChild(seccion('🕐','Hora fin',data.horaFin,!!data.horaFin));
   box.appendChild(seccion('🔧','Tipo de visita',data.tipoVisita,!!data.tipoVisita));
