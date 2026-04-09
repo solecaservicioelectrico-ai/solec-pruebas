@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SOLEC · Mario v4.11</title>
+<title>SOLEC · Mario v4.12</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -475,7 +475,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.11</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v4.12</span></div>
   </div>
 </div>
 
@@ -6612,55 +6612,79 @@ function mostrarPantallaHablar(){
 }
 
 function toggleGrabacion(txtEl,btnMic,btnProc){
+  // ── DETENER ──────────────────────────────────────────────────
   if(_asistRec&&_asistRec.estado==='grabando'){
-    _asistRec.stop();
+    _asistRec.estado='detenido'; // marcar ANTES de stop() para que onend no reinicie
+    try{_asistRec.stop();}catch(e){}
+    btnMic.style.borderColor='#4a9eff';
+    btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
+    btnMic.innerHTML='🎤';
+    txtEl.style.color='#e8eaf0';
+    if(_asistTexto.trim())btnProc.style.display='block';
     return;
   }
+  // ── INICIAR ───────────────────────────────────────────────────
   if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
     alert('Tu navegador no soporta reconocimiento de voz. Usá Chrome.');
     return;
   }
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  _asistRec=new SR();
-  _asistRec.lang='es-AR';
-  _asistRec.continuous=true;
-  _asistRec.interimResults=true;
-  _asistRec.maxAlternatives=1;
-  _asistRec.estado='grabando';
+  // Texto acumulado — separado del objeto recognition para sobrevivir reinicios
+  var _textoFinal='';   // segmentos finales confirmados
+  var _textoInterim=''; // lo que se está diciendo ahora
   _asistTexto='';
+  function actualizarUI(){
+    var mostrar=(_textoFinal+' '+_textoInterim).trim();
+    _asistTexto=_textoFinal.trim(); // solo los finales para el envío
+    txtEl.textContent=mostrar||'🔴 Escuchando...';
+  }
+  function iniciarRec(){
+    var rec=new SR();
+    rec.lang='es-AR';
+    rec.continuous=false;   // false + reinicio manual = más estable en Chrome
+    rec.interimResults=true;
+    rec.maxAlternatives=1;
+    rec.estado='grabando';
+    rec.onresult=function(e){
+      _textoInterim='';
+      for(var i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal){
+          _textoFinal+=e.results[i][0].transcript+' ';
+          _textoInterim='';
+        } else {
+          _textoInterim+=e.results[i][0].transcript;
+        }
+      }
+      actualizarUI();
+    };
+    rec.onerror=function(e){
+      if(e.error==='no-speech'||e.error==='aborted')return;
+      // Error real — mostrar pero no bloquear
+      console.warn('[MIC] error:',e.error);
+    };
+    rec.onend=function(){
+      if(_asistRec&&_asistRec.estado==='grabando'){
+        // Browser cortó solo — reiniciar silenciosamente
+        _textoInterim='';
+        try{rec.start();}catch(ex){
+          // Si falla el reinicio, crear nueva instancia
+          setTimeout(function(){
+            if(_asistRec&&_asistRec.estado==='grabando')iniciarRec();
+          },150);
+        }
+      }
+    };
+    _asistRec=rec;
+    rec.start();
+  }
+  // UI grabando
   btnMic.style.borderColor='#ff4757';
   btnMic.style.background='linear-gradient(135deg,#2d0a0a,#1a0505)';
-  btnMic.innerHTML='⏹️<span style="display:block;font-size:11px;letter-spacing:1px;margin-top:4px;">DETENER</span>';
+  btnMic.innerHTML='⏹️<span style="display:block;font-size:11px;letter-spacing:1px;margin-top:4px;color:#ff4757;">DETENER</span>';
   txtEl.style.color='#f4c542';
   txtEl.textContent='🔴 Escuchando... hablá todo lo que quieras y después tocá DETENER';
-  _asistRec.onresult=function(e){
-    var txt='';
-    for(var i=0;i<e.results.length;i++){txt+=e.results[i][0].transcript+' ';}
-    _asistTexto=txt.trim();
-    txtEl.textContent=_asistTexto;
-  };
-  _asistRec.onerror=function(e){
-    if(e.error==='no-speech')return; // ignorar silencio — continuous sigue
-    txtEl.style.color='#e63946';
-    txtEl.textContent='Error: '+e.error+'. Intentá de nuevo.';
-    btnMic.style.borderColor='#4a9eff';
-    btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
-    btnMic.innerHTML='🎤';
-  };
-  _asistRec.onend=function(){
-    // Solo detener UI si fue detenido manualmente (no reiniciar automático)
-    if(_asistRec.estado==='detenido'){
-      btnMic.style.borderColor='#4a9eff';
-      btnMic.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';
-      btnMic.innerHTML='🎤';
-      txtEl.style.color='#e8eaf0';
-      if(_asistTexto.trim())btnProc.style.display='block';
-    } else if(_asistRec.estado==='grabando'){
-      // El browser cortó solo (ej: timeout interno) — reiniciar automáticamente
-      try{_asistRec.start();}catch(ex){}
-    }
-  };
-  _asistRec.start();
+  btnProc.style.display='none';
+  iniciarRec();
 }
 
 async function interpretarConIA(texto,ovRef){
