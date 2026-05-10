@@ -544,7 +544,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.4</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.5</div>
     </div>
   </div>
 
@@ -677,11 +677,11 @@ body {
   <!-- BANNER RESUMEN -->
   <div style="margin:10px 12px 0;background:linear-gradient(135deg,#1e1d10,var(--s1));border:1px solid rgba(245,197,24,.4);border-radius:var(--r);padding:14px 16px">
     <div style="display:flex;gap:10px">
-      <div class="sem-item rojo" style="flex:1">
+      <div class="sem-item rojo" style="flex:1;cursor:pointer" onclick="filtrarPreventivos('pendiente')">
         <div class="sem-num rojo blink" id="prev-pend-header">—</div>
         <div class="sem-label">Pendientes</div>
       </div>
-      <div class="sem-item naranja" style="flex:1">
+      <div class="sem-item naranja" style="flex:1;cursor:pointer" onclick="filtrarPreventivos('encurso')">
         <div class="sem-num naranja blink-soft" id="prev-enc-header">—</div>
         <div class="sem-label">En curso</div>
       </div>
@@ -689,8 +689,24 @@ body {
     <div style="margin-top:10px;font-size:11px;color:var(--t3);font-weight:600;text-align:center" id="prev-reinicio-header">—</div>
   </div>
 
+  <!-- FILTROS -->
+  <div style="margin:10px 12px 0;display:flex;gap:6px">
+    <div id="prev-f-todos" onclick="filtrarPreventivos('todos')"
+      style="flex:1;background:var(--azul);border:1px solid var(--azul);border-radius:20px;padding:7px 10px;font-size:11px;font-weight:800;color:#fff;text-align:center;cursor:pointer">
+      Todos
+    </div>
+    <div id="prev-f-encurso" onclick="filtrarPreventivos('encurso')"
+      style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:7px 10px;font-size:11px;font-weight:800;color:var(--t3);text-align:center;cursor:pointer">
+      En curso
+    </div>
+    <div id="prev-f-pendiente" onclick="filtrarPreventivos('pendiente')"
+      style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:7px 10px;font-size:11px;font-weight:800;color:var(--t3);text-align:center;cursor:pointer">
+      Pendientes
+    </div>
+  </div>
+
   <!-- SEPARADOR EN CURSO -->
-  <div style="margin:14px 12px 6px;display:flex;align-items:center;gap:8px">
+  <div id="prev-sep-encurso" style="margin:14px 12px 6px;display:flex;align-items:center;gap:8px">
     <div style="width:6px;height:6px;border-radius:50%;background:var(--naranja);flex-shrink:0"></div>
     <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">En curso · <span id="prev-enc-count">0</span></div>
     <div style="flex:1;height:1px;background:var(--borde)"></div>
@@ -700,7 +716,7 @@ body {
   </div>
 
   <!-- SEPARADOR PENDIENTES -->
-  <div style="margin:14px 12px 6px;display:flex;align-items:center;gap:8px">
+  <div id="prev-sep-pendientes" style="margin:14px 12px 6px;display:flex;align-items:center;gap:8px">
     <div style="width:6px;height:6px;border-radius:50%;background:var(--rojo);box-shadow:0 0 5px var(--rojo);flex-shrink:0"></div>
     <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">Pendientes · <span id="prev-pend-count">0</span></div>
     <div style="flex:1;height:1px;background:var(--borde)"></div>
@@ -716,8 +732,68 @@ body {
       <div class="btn-back" onclick="ir('pantalla-dashboard')">← Volver</div>
       <div><div class="hdr-title">Trabajos Pendientes</div><div class="hdr-sub">Asignados por Ali</div></div>
     </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--t3);letter-spacing:1px">
+      <span id="pend-total-header" style="color:var(--rojo)">—</span> trabajos
+    </div>
   </div>
-  <div class="scroll-body"><div class="empty-state"><div class="spinner"></div><div class="empty-title">Cargando...</div></div></div>
+
+  <!-- SEMÁFORO -->
+  <div style="margin:10px 12px 0;display:flex;gap:8px">
+    <div class="pend-item urg" style="flex:1;cursor:pointer" onclick="filtrarPendientes('urgente')">
+      <div class="pend-dot urg"></div>
+      <div class="pend-num urg blink" id="pend-urg-h">—</div>
+      <div class="pend-lbl">Urgentes</div>
+    </div>
+    <div class="pend-item hoy" style="flex:1;cursor:pointer" onclick="filtrarPendientes('hoy')">
+      <div class="pend-dot hoy"></div>
+      <div class="pend-num hoy blink-soft" id="pend-hoy-h">—</div>
+      <div class="pend-lbl">Para hoy</div>
+    </div>
+    <div class="pend-item sem" style="flex:1;cursor:pointer" onclick="filtrarPendientes('semana')">
+      <div class="pend-dot sem"></div>
+      <div class="pend-num sem blink-soft" id="pend-sem-h">—</div>
+      <div class="pend-lbl">Esta semana</div>
+    </div>
+  </div>
+
+  <!-- PARCIALES -->
+  <div style="margin:8px 12px 0">
+    <div class="pend-parcial" onclick="ir('pantalla-parciales')">
+      <div class="pp-left">
+        <div class="pp-icon">💾</div>
+        <div>
+          <div class="pp-title">Registros Parciales</div>
+          <div class="pp-sub">Trabajos sin finalizar</div>
+        </div>
+      </div>
+      <div class="pp-num blink-soft" id="pend-parc-h">—</div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div style="margin:10px 12px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">
+    <div id="pend-f-todos" onclick="filtrarPendientes('todos')"
+      style="flex-shrink:0;background:var(--azul);border:1px solid var(--azul);border-radius:20px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap">
+      Todos
+    </div>
+    <div id="pend-f-urgente" onclick="filtrarPendientes('urgente')"
+      style="flex-shrink:0;background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:7px 14px;font-size:11px;font-weight:800;color:var(--t3);cursor:pointer;white-space:nowrap">
+      🚨 Urgentes
+    </div>
+    <div id="pend-f-hoy" onclick="filtrarPendientes('hoy')"
+      style="flex-shrink:0;background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:7px 14px;font-size:11px;font-weight:800;color:var(--t3);cursor:pointer;white-space:nowrap">
+      Para hoy
+    </div>
+    <div id="pend-f-semana" onclick="filtrarPendientes('semana')"
+      style="flex-shrink:0;background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:7px 14px;font-size:11px;font-weight:800;color:var(--t3);cursor:pointer;white-space:nowrap">
+      Esta semana
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <div style="padding:10px 12px 30px;display:flex;flex-direction:column;gap:8px" id="pend-lista">
+    <div class="empty-state"><div class="spinner"></div></div>
+  </div>
 </div>
 
 <div class="pantalla" id="pantalla-parciales">
@@ -1069,6 +1145,156 @@ function renderGraficoHoras(dias) {
 }
 
 /* ══════════════════════════════════════════════════
+   FILTRO PREVENTIVOS
+   ══════════════════════════════════════════════════ */
+var _filtroPreventivos = 'todos';
+
+function filtrarPreventivos(filtro) {
+  _filtroPreventivos = filtro;
+
+  // Actualizar estilos botones
+  ['todos','encurso','pendiente'].forEach(id => {
+    const el = document.getElementById('prev-f-' + id);
+    if (!el) return;
+    const on = id === filtro;
+    const color = id === 'encurso' ? 'var(--naranja)' : id === 'pendiente' ? 'var(--rojo)' : 'var(--azul)';
+    el.style.background = on ? color : 'var(--s2)';
+    el.style.borderColor = on ? color : 'var(--borde)';
+    el.style.color = on ? '#fff' : 'var(--t3)';
+  });
+
+  const sepEnCurso  = document.getElementById('prev-sep-encurso');
+  const sepPend     = document.getElementById('prev-sep-pendientes');
+  const listaEnC    = document.getElementById('prev-lista-encurso');
+  const listaPend   = document.getElementById('prev-lista-pendientes');
+
+  if (filtro === 'encurso') {
+    sepEnCurso.style.display = 'flex';
+    listaEnC.style.display = 'flex';
+    sepPend.style.display = 'none';
+    listaPend.style.display = 'none';
+  } else if (filtro === 'pendiente') {
+    sepEnCurso.style.display = 'none';
+    listaEnC.style.display = 'none';
+    sepPend.style.display = 'flex';
+    listaPend.style.display = 'flex';
+  } else {
+    sepEnCurso.style.display = 'flex';
+    listaEnC.style.display = 'flex';
+    sepPend.style.display = 'flex';
+    listaPend.style.display = 'flex';
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   TRABAJOS PENDIENTES — renderizado y filtro
+   ══════════════════════════════════════════════════ */
+var _filtroPendientes = 'todos';
+var _ordenesData = { urgentes:[], hoy:[], semana:[], otros:[] };
+
+function renderPendientes() {
+  const hoyStr = fechaHoy();
+  const finSemana = new Date();
+  finSemana.setDate(finSemana.getDate() + 7);
+  const finSemStr = finSemana.toISOString().split('T')[0];
+
+  _ordenesData = { urgentes:[], hoy:[], semana:[], otros:[] };
+
+  S.ordenes.forEach(o => {
+    if (String(o.Estado||'').toLowerCase() !== 'pendiente') return;
+    const urg = String(o.Urgencia||'').toLowerCase();
+    const fecha = o.Fecha ? String(o.Fecha).split('T')[0] : '';
+    if (urg === 'urgente') { _ordenesData.urgentes.push(o); return; }
+    if (fecha === hoyStr)  { _ordenesData.hoy.push(o); return; }
+    if (fecha > hoyStr && fecha <= finSemStr) { _ordenesData.semana.push(o); return; }
+    _ordenesData.otros.push(o);
+  });
+
+  const total = _ordenesData.urgentes.length + _ordenesData.hoy.length +
+                _ordenesData.semana.length + _ordenesData.otros.length;
+
+  // Actualizar contadores header
+  const th = document.getElementById('pend-total-header');
+  const uh = document.getElementById('pend-urg-h');
+  const hh = document.getElementById('pend-hoy-h');
+  const sh = document.getElementById('pend-sem-h');
+  const ph = document.getElementById('pend-parc-h');
+  if (th) th.textContent = total;
+  if (uh) uh.textContent = _ordenesData.urgentes.length;
+  if (hh) hh.textContent = _ordenesData.hoy.length;
+  if (sh) sh.textContent = _ordenesData.semana.length;
+  if (ph) ph.textContent = S.parciales.length;
+
+  filtrarPendientes('todos');
+}
+
+function filtrarPendientes(filtro) {
+  _filtroPendientes = filtro;
+
+  // Botones filtro
+  ['todos','urgente','hoy','semana'].forEach(id => {
+    const el = document.getElementById('pend-f-' + id);
+    if (!el) return;
+    const on = id === filtro;
+    const color = id === 'urgente' ? 'var(--rojo)' : id === 'hoy' ? 'var(--naranja)' : id === 'semana' ? 'var(--am)' : 'var(--azul)';
+    el.style.background = on ? color : 'var(--s2)';
+    el.style.borderColor = on ? color : 'var(--borde)';
+    el.style.color = on ? (id === 'semana' ? '#000' : '#fff') : 'var(--t3)';
+  });
+
+  let items = [];
+  if (filtro === 'urgente') items = _ordenesData.urgentes;
+  else if (filtro === 'hoy') items = _ordenesData.hoy;
+  else if (filtro === 'semana') items = _ordenesData.semana;
+  else items = [..._ordenesData.urgentes, ..._ordenesData.hoy, ..._ordenesData.semana, ..._ordenesData.otros];
+
+  const lista = document.getElementById('pend-lista');
+  if (!lista) return;
+
+  if (items.length === 0) {
+    lista.innerHTML = `<div class="empty-state"><div class="empty-icon">✓</div><div class="empty-title">Sin trabajos</div><div class="empty-sub">No hay trabajos en esta categoría</div></div>`;
+    return;
+  }
+
+  lista.innerHTML = items.map(o => {
+    const urg = String(o.Urgencia||'').toLowerCase();
+    const esUrgente = urg === 'urgente';
+    const fecha = o.Fecha ? String(o.Fecha).split('T')[0] : '';
+    const hoyStr2 = fechaHoy();
+    const esHoy = fecha === hoyStr2;
+    const color = esUrgente ? 'var(--rojo)' : esHoy ? 'var(--naranja)' : 'var(--am)';
+    const colorBg = esUrgente ? '#1a0d10' : esHoy ? '#1e1208' : '#1e1d10';
+    const badgeTxt = esUrgente ? '🚨 Urgente' : esHoy ? 'Para hoy' : fecha ? `Para el ${fecha.split('-').reverse().join('/')}` : 'Esta semana';
+    const edif = o.Edificio || '—';
+    const desc = o.Descripcion || o['Descripcion'] || '—';
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(edif + ', Mar del Plata')}`;
+    const ts = o.Timestamp || o.Fecha || '';
+    const tsLabel = ts ? String(ts).replace('T',' ').substring(0,16) : '—';
+
+    return `
+      <div style="background:linear-gradient(135deg,${colorBg},var(--s1));border:1px solid var(--borde);border-left:4px solid ${color};border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px;cursor:pointer"
+           onclick="abrirOrden('${(edif).replace(/'/g,"\\'")}','${(desc).replace(/'/g,"\\'")}')">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--t)">${edif}</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:4px 8px;font-size:13px;cursor:pointer"
+                 onclick="event.stopPropagation();window.open('${mapsUrl}','_blank')">📍</div>
+            <div style="border-radius:20px;padding:4px 10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;background:rgba(0,0,0,.2);border:1px solid ${color};color:${color};white-space:nowrap${esUrgente?' animation:blink 1.3s ease-in-out infinite':''}">${badgeTxt}</div>
+          </div>
+        </div>
+        <div style="background:var(--s2);border:1px solid var(--borde);border-left:3px solid ${color};border-radius:var(--rs);padding:8px 10px;font-size:13px;color:var(--t2);font-weight:600;line-height:1.4">"${desc}"</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Cargado: ${tsLabel}</div>
+      </div>`;
+  }).join('');
+}
+
+function abrirOrden(edificio, descripcion) {
+  S.regActual = { edificio, notaPrevia: descripcion };
+  document.getElementById('nr-edif-sub').textContent = edificio;
+  ir('pantalla-nuevo-registro');
+}
+
+/* ══════════════════════════════════════════════════
    PREVENTIVOS — renderizado
    ══════════════════════════════════════════════════ */
 function renderPreventivos() {
@@ -1239,7 +1465,7 @@ async function cargarDatos() {
       ocultarLoading();
       renderDashboard();
       renderPreventivos();
-      // Asegurar que el dashboard sea visible
+      renderPendientes();
       document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
       document.getElementById('pantalla-dashboard').classList.add('activa');
       S.pantallaActual = 'pantalla-dashboard';
