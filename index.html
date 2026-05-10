@@ -544,7 +544,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.3</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.4</div>
     </div>
   </div>
 
@@ -924,8 +924,7 @@ function renderDashboard() {
   // Fecha
   document.getElementById('dash-fecha').textContent = fechaLegible(fechaHoy());
   document.getElementById('dash-mes-label').textContent = mesActualLabel();
-  document.getElementById('prev-mes-label').textContent = mesActualLabel();
-  document.getElementById('prev-reinicio').textContent = `Se reinician el ${primerDiaMesSiguiente()}`;
+  // prev-mes-label se actualiza en renderPreventivos
 
   // Preventivos
   const hoy = new Date();
