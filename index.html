@@ -544,7 +544,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.5</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.6</div>
     </div>
   </div>
 
@@ -800,10 +800,19 @@ body {
   <div class="hdr">
     <div class="hdr-left">
       <div class="btn-back" onclick="ir('pantalla-dashboard')">← Volver</div>
-      <div><div class="hdr-title">Registros Parciales</div><div class="hdr-sub">Trabajos sin finalizar</div></div>
+      <div>
+        <div class="hdr-title">💾 Registros Parciales</div>
+        <div class="hdr-sub">Trabajos sin finalizar</div>
+      </div>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--t3);letter-spacing:1px">
+      <span id="parc-total" style="color:var(--naranja)">—</span> parciales
     </div>
   </div>
-  <div class="scroll-body"><div class="empty-state"><div class="spinner"></div><div class="empty-title">Cargando...</div></div></div>
+
+  <div style="padding:10px 12px 30px;display:flex;flex-direction:column;gap:8px" id="parc-lista">
+    <div class="empty-state"><div class="spinner"></div></div>
+  </div>
 </div>
 
 <div class="pantalla" id="pantalla-nuevo-registro">
@@ -1145,6 +1154,114 @@ function renderGraficoHoras(dias) {
 }
 
 /* ══════════════════════════════════════════════════
+   REGISTROS PARCIALES — renderizado
+   ══════════════════════════════════════════════════ */
+function renderParciales() {
+  const total = document.getElementById('parc-total');
+  const lista = document.getElementById('parc-lista');
+  if (total) total.textContent = S.parciales.length;
+  // también actualizar dashboard
+  const dashParc = document.getElementById('pend-parciales');
+  if (dashParc) dashParc.textContent = S.parciales.length;
+  const pendParc = document.getElementById('pend-parc-h');
+  if (pendParc) pendParc.textContent = S.parciales.length;
+
+  if (!lista) return;
+
+  if (S.parciales.length === 0) {
+    lista.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">✓</div>
+        <div class="empty-title">Sin parciales</div>
+        <div class="empty-sub">No tenés registros sin finalizar</div>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = S.parciales.map(p => {
+    const edif   = p.Edificio || '—';
+    const tipo   = p.Tipo || '—';
+    const estado = p.Estado || '—';
+    const ultima = p.Ultima_Actualizacion ? String(p.Ultima_Actualizacion).replace('T',' ').substring(0,16) : '—';
+    const id     = p.ID_Parcial || '';
+
+    // Parsear jornadas
+    let jornadas = [];
+    try { jornadas = JSON.parse(p.Jornadas || '[]'); } catch(e) {}
+    const nJornadas = jornadas.length;
+
+    // Contar intervenciones totales
+    let nInterv = 0;
+    jornadas.forEach(j => {
+      const interv = j.intervenciones || '';
+      const matches = interv.match(/\d+\./g);
+      if (matches) nInterv += matches.length;
+    });
+
+    // Última jornada
+    const ultJorn = jornadas[jornadas.length - 1];
+    const ultFecha = ultJorn ? ultJorn.fecha : '—';
+    const ultHoraI = ultJorn ? ultJorn.horaInicio : '—';
+    const ultHoraF = ultJorn ? (ultJorn.horaFin || 'Sin hora fin') : '—';
+
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(edif + ', Mar del Plata')}`;
+
+    return `
+      <div style="background:linear-gradient(135deg,#1e1208,var(--s1));border:1px dashed rgba(255,140,66,.5);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;cursor:pointer"
+           onclick="continuarParcial('${id.replace(/'/g,"\\'")}','${edif.replace(/'/g,"\\'")}','${tipo}')">
+
+        <!-- top -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--t)">${edif}</div>
+            <div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:2px">${tipo}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:4px 8px;font-size:13px;cursor:pointer"
+                 onclick="event.stopPropagation();window.open('${mapsUrl}','_blank')">📍</div>
+            <div style="border-radius:20px;padding:4px 10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;background:rgba(255,140,66,.15);border:1px dashed rgba(255,140,66,.5);color:var(--naranja)" class="blink-soft">💾 Parcial</div>
+          </div>
+        </div>
+
+        <!-- chips info -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div style="background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--azul)">
+            📅 ${nJornadas} jornada${nJornadas!==1?'s':''}
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--borde);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--verde)">
+            🛠️ ${nInterv} intervención${nInterv!==1?'es':''}
+          </div>
+        </div>
+
+        <!-- última jornada -->
+        <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:8px 12px">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:4px">Última jornada</div>
+          <div style="font-size:12px;font-weight:700;color:var(--t2)">${ultFecha} · ${ultHoraI} → ${ultHoraF}</div>
+        </div>
+
+        <!-- botón continuar -->
+        <div style="background:var(--naranja);border:none;border-radius:var(--rs);padding:12px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#000;text-align:center;font-weight:900">
+          ▶ Continuar registro
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function continuarParcial(idParcial, edificio, tipo) {
+  // Carga el parcial en el registro actual y navega al formulario
+  const parcial = S.parciales.find(p => p.ID_Parcial === idParcial);
+  S.regActual = {
+    idParcial,
+    edificio,
+    tipoVisita: tipo,
+    esParcial: true,
+    dataParcial: parcial,
+  };
+  document.getElementById('nr-edif-sub').textContent = edificio;
+  ir('pantalla-nuevo-registro');
+}
+
+/* ══════════════════════════════════════════════════
    FILTRO PREVENTIVOS
    ══════════════════════════════════════════════════ */
 var _filtroPreventivos = 'todos';
@@ -1466,6 +1583,7 @@ async function cargarDatos() {
       renderDashboard();
       renderPreventivos();
       renderPendientes();
+      renderParciales();
       document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
       document.getElementById('pantalla-dashboard').classList.add('activa');
       S.pantallaActual = 'pantalla-dashboard';
