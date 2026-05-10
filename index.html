@@ -544,7 +544,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.1</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.2</div>
     </div>
   </div>
 
@@ -1262,13 +1262,17 @@ async function cargarDatos() {
       ocultarLoading();
       renderDashboard();
       renderPreventivos();
-      ir('pantalla-dashboard');
+      // Asegurar que el dashboard sea visible
+      document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+      document.getElementById('pantalla-dashboard').classList.add('activa');
+      S.pantallaActual = 'pantalla-dashboard';
+      window.scrollTo(0,0);
     }, 400);
 
   } catch(e) {
-    setLoading(0, 'Error de conexión');
+    document.getElementById('loading-bar').style.width = '0%';
     document.getElementById('loading-msg').style.color = 'var(--rojo)';
-    document.getElementById('loading-msg').textContent = 'Sin conexión · Reintentando...';
+    document.getElementById('loading-msg').textContent = 'Sin conexión · Reintentando en 4s...';
     setTimeout(cargarDatos, 4000);
   }
 }
