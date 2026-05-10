@@ -981,40 +981,40 @@ function renderGraficoHoras(dias) {
 async function cargarDatos() {
   try {
     setLoading(10, 'Cargando edificios...');
-    const resEdif = await asGet({ action: 'getSheet', sheet: 'Edificios' });
-    S.edificios = resEdif.data || [];
+    const resEdif = await asGet({ sheet: 'Edificios' });
+    S.edificios = Array.isArray(resEdif) ? resEdif : [];
 
     setLoading(25, 'Cargando categorías...');
-    const resCat = await asGet({ action: 'getSheet', sheet: 'Config_Categorias' });
-    S.categorias = resCat.data || [];
+    const resCat = await asGet({ sheet: 'Config_Categorias' });
+    S.categorias = Array.isArray(resCat) ? resCat : [];
 
     setLoading(40, 'Cargando materiales...');
-    const resMat = await asGet({ action: 'getSheet', sheet: 'Catalogo_Materiales' });
-    S.materiales = resMat.data || [];
+    const resMat = await asGet({ sheet: 'Catalogo_Materiales' });
+    S.materiales = Array.isArray(resMat) ? resMat : [];
 
     setLoading(50, 'Cargando modificadores...');
-    const resMod = await asGet({ action: 'getSheet', sheet: 'Modificadores' });
-    S.modificadores = resMod.data || [];
+    const resMod = await asGet({ sheet: 'Modificadores' });
+    S.modificadores = Array.isArray(resMod) ? resMod : [];
 
     setLoading(60, 'Cargando ubicaciones...');
-    const resUbic = await asGet({ action: 'getSheet', sheet: 'Ubicaciones' });
-    S.ubicaciones = resUbic.data || [];
+    const resUbic = await asGet({ sheet: 'Ubicaciones' });
+    S.ubicaciones = Array.isArray(resUbic) ? resUbic : [];
 
     setLoading(65, 'Cargando condiciones...');
-    const resCond = await asGet({ action: 'getSheet', sheet: 'Config_Condiciones' });
-    S.condiciones = resCond.data || [];
+    const resCond = await asGet({ sheet: 'Config_Condiciones' });
+    S.condiciones = Array.isArray(resCond) ? resCond : [];
 
     setLoading(72, 'Cargando órdenes...');
-    const resOrd = await asGet({ action: 'getSheet', sheet: 'Ordenes' });
-    S.ordenes = resOrd.data || [];
+    const resOrd = await asGet({ sheet: 'Ordenes' });
+    S.ordenes = Array.isArray(resOrd) ? resOrd : [];
 
     setLoading(80, 'Cargando parciales...');
-    const resPar = await asGet({ action: 'getSheet', sheet: 'Registros_Parciales' });
-    S.parciales = resPar.data || [];
+    const resPar = await asGet({ sheet: 'Registros_Parciales' });
+    S.parciales = Array.isArray(resPar) ? resPar : [];
 
     setLoading(90, 'Cargando registros...');
-    const resReg = await asGet({ action: 'getSheet', sheet: 'Registros', limit: 200 });
-    S.registros = resReg.data || [];
+    const resReg = await asGet({ sheet: 'Registros', limit: '200' });
+    S.registros = Array.isArray(resReg) ? resReg : [];
 
     setLoading(100, '¡Listo!');
     setTimeout(() => {
