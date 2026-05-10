@@ -443,6 +443,57 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ══════════════════════════════════════════════════
+   TARJETA EDIFICIO (Preventivos)
+   ══════════════════════════════════════════════════ */
+.edif-card {
+  background: var(--s1);
+  border-radius: var(--r);
+  border: 1px solid var(--borde);
+  border-left: 4px solid transparent;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: transform .1s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.edif-card:active { transform: scale(.98); }
+.edif-card.pendiente { border-left-color: var(--rojo);    background: linear-gradient(135deg,#1a0d10,var(--s1)); }
+.edif-card.en-curso  { border-left-color: var(--naranja); background: linear-gradient(135deg,#1e1208,var(--s1)); }
+
+.edif-top   { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.edif-nombre { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1.5px; color:var(--t); line-height:1.1; }
+.edif-badge {
+  border-radius: 20px; padding:4px 10px;
+  font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.8px;
+  white-space:nowrap; flex-shrink:0;
+}
+.edif-badge.pendiente { background:rgba(255,71,87,.15);  color:var(--rojo);    border:1px solid rgba(255,71,87,.4); }
+.edif-badge.en-curso  { background:rgba(255,140,66,.15); color:var(--naranja); border:1px solid rgba(255,140,66,.4);}
+
+.edif-meta  { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.edif-dir   { font-size:13px; color:var(--t3); font-weight:600; }
+.edif-admin {
+  background:var(--s2); border:1px solid var(--borde); border-radius:20px;
+  padding:2px 8px; font-size:10px; font-weight:800; color:var(--t2);
+  text-transform:uppercase; letter-spacing:.5px;
+}
+.edif-maps  {
+  background:var(--s2); border:1px solid var(--borde); border-radius:var(--rs);
+  padding:4px 8px; font-size:13px; cursor:pointer; flex-shrink:0;
+}
+.edif-info  { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.edif-info-txt { font-size:11px; font-weight:700; }
+.edif-info-txt.rojo    { color:rgba(255,71,87,.8); }
+.edif-info-txt.naranja { color:rgba(255,140,66,.9); }
+.edif-visits {
+  display:flex; align-items:center; gap:4px;
+  background:rgba(0,200,150,.1); border:1px solid rgba(0,200,150,.25);
+  border-radius:20px; padding:3px 8px;
+  font-size:10px; font-weight:800; color:var(--verde);
+}
+
+/* ══════════════════════════════════════════════════
    EMPTY STATE
    ══════════════════════════════════════════════════ */
 .empty-state {
@@ -493,6 +544,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.1</div>
     </div>
   </div>
 
@@ -610,10 +662,52 @@ body {
   <div class="hdr">
     <div class="hdr-left">
       <div class="btn-back" onclick="ir('pantalla-dashboard')">← Volver</div>
-      <div><div class="hdr-title">Preventivos</div><div class="hdr-sub" id="prev-mes-label">—</div></div>
+      <div>
+        <div class="hdr-title">Preventivos</div>
+        <div class="hdr-sub" id="prev-mes-header">—</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--t3);letter-spacing:1px">
+        <span id="prev-total-header" style="color:var(--am)">—</span> edificios
+      </div>
     </div>
   </div>
-  <div class="scroll-body"><div class="empty-state"><div class="spinner"></div><div class="empty-title">Cargando...</div></div></div>
+
+  <!-- BANNER RESUMEN -->
+  <div style="margin:10px 12px 0;background:linear-gradient(135deg,#1e1d10,var(--s1));border:1px solid rgba(245,197,24,.4);border-radius:var(--r);padding:14px 16px">
+    <div style="display:flex;gap:10px">
+      <div class="sem-item rojo" style="flex:1">
+        <div class="sem-num rojo blink" id="prev-pend-header">—</div>
+        <div class="sem-label">Pendientes</div>
+      </div>
+      <div class="sem-item naranja" style="flex:1">
+        <div class="sem-num naranja blink-soft" id="prev-enc-header">—</div>
+        <div class="sem-label">En curso</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--t3);font-weight:600;text-align:center" id="prev-reinicio-header">—</div>
+  </div>
+
+  <!-- SEPARADOR EN CURSO -->
+  <div style="margin:14px 12px 6px;display:flex;align-items:center;gap:8px">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--naranja);flex-shrink:0"></div>
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">En curso · <span id="prev-enc-count">0</span></div>
+    <div style="flex:1;height:1px;background:var(--borde)"></div>
+  </div>
+  <div style="padding:0 12px;display:flex;flex-direction:column;gap:8px" id="prev-lista-encurso">
+    <div class="empty-state" style="padding:20px"><div class="spinner"></div></div>
+  </div>
+
+  <!-- SEPARADOR PENDIENTES -->
+  <div style="margin:14px 12px 6px;display:flex;align-items:center;gap:8px">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--rojo);box-shadow:0 0 5px var(--rojo);flex-shrink:0"></div>
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">Pendientes · <span id="prev-pend-count">0</span></div>
+    <div style="flex:1;height:1px;background:var(--borde)"></div>
+  </div>
+  <div style="padding:0 12px 30px;display:flex;flex-direction:column;gap:8px" id="prev-lista-pendientes">
+    <div class="empty-state" style="padding:20px"><div class="spinner"></div></div>
+  </div>
 </div>
 
 <div class="pantalla" id="pantalla-pendientes">
@@ -976,6 +1070,153 @@ function renderGraficoHoras(dias) {
 }
 
 /* ══════════════════════════════════════════════════
+   PREVENTIVOS — renderizado
+   ══════════════════════════════════════════════════ */
+function renderPreventivos() {
+  const hoy = new Date();
+  const mes = hoy.getMonth();
+  const anio = hoy.getFullYear();
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const mesLabel = `${meses[mes]} ${anio}`;
+  const sigMes = new Date(anio, mes+1, 1);
+  const reinicio = `Se reinician el 1 de ${meses[sigMes.getMonth()]}`;
+
+  // Actualizar header
+  document.getElementById('prev-mes-header').textContent = mesLabel;
+  document.getElementById('prev-reinicio-header').textContent = reinicio;
+
+  // Edificios abonados
+  const abonados = S.edificios.filter(e => String(e['Abonado']).toLowerCase() === 'si');
+
+  // Registros del mes actual con tipo preventivo
+  const regsPreventivo = S.registros.filter(r => {
+    if (!r.Fecha) return false;
+    const f = new Date(r.Fecha);
+    return f.getMonth() === mes && f.getFullYear() === anio &&
+           String(r['Tipo de Visita']).toLowerCase().includes('preventivo');
+  });
+
+  // Agrupar por edificio
+  const regsPorEdif = {};
+  regsPreventivo.forEach(r => {
+    if (!regsPorEdif[r.Edificio]) regsPorEdif[r.Edificio] = [];
+    regsPorEdif[r.Edificio].push(r);
+  });
+
+  // Último registro del mes anterior para edificios pendientes
+  const regsAnterior = S.registros.filter(r => {
+    if (!r.Fecha) return false;
+    const f = new Date(r.Fecha);
+    return (f.getMonth() === mes-1 && f.getFullYear() === anio) ||
+           (mes === 0 && f.getMonth() === 11 && f.getFullYear() === anio-1);
+  });
+  const ultAnterior = {};
+  regsAnterior.forEach(r => {
+    if (!ultAnterior[r.Edificio] || r.Fecha > ultAnterior[r.Edificio]) {
+      ultAnterior[r.Edificio] = r.Fecha;
+    }
+  });
+
+  const enCurso = [];
+  const pendientes = [];
+
+  abonados.forEach(edif => {
+    const nombre = edif.Nombre || edif['Nombre'] || '';
+    const regs = regsPorEdif[nombre] || [];
+    if (regs.length > 0) {
+      // Ordenar por fecha desc
+      regs.sort((a,b) => (b.Fecha||'') > (a.Fecha||'') ? 1 : -1);
+      const fechas = [...new Set(regs.map(r => r.Fecha))].sort().reverse();
+      enCurso.push({ edif, regs, fechas });
+    } else {
+      pendientes.push({ edif, ultFecha: ultAnterior[nombre] || null });
+    }
+  });
+
+  // Actualizar contadores
+  document.getElementById('prev-total-header').textContent = abonados.length;
+  document.getElementById('prev-pend-header').textContent = pendientes.length;
+  document.getElementById('prev-enc-header').textContent = enCurso.length;
+  document.getElementById('prev-enc-count').textContent = enCurso.length;
+  document.getElementById('prev-pend-count').textContent = pendientes.length;
+  // también actualizar dashboard
+  document.getElementById('prev-pendientes').textContent = pendientes.length;
+  document.getElementById('prev-encurso').textContent = enCurso.length;
+
+  // Render EN CURSO
+  const listaEnCurso = document.getElementById('prev-lista-encurso');
+  if (enCurso.length === 0) {
+    listaEnCurso.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">✓</div><div class="empty-sub">Sin edificios en curso aún</div></div>';
+  } else {
+    listaEnCurso.innerHTML = enCurso.map(({ edif, regs, fechas }) => {
+      const nombre = edif.Nombre || '';
+      const dir = edif['Dirección'] || '';
+      const admin = edif['Administración'] || '';
+      const ultFecha = fechas[0] || '';
+      const ultHora = regs.find(r => r.Fecha === ultFecha)?.Hora || '';
+      const visitas = fechas.length;
+      const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(dir + ', Mar del Plata')}`;
+      return `
+        <div class="edif-card en-curso" onclick="abrirPreventivo('${nombre.replace(/'/g,"\\'")}')">
+          <div class="edif-top">
+            <div class="edif-nombre">${nombre}</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <div class="edif-maps" onclick="event.stopPropagation();window.open('${mapsUrl}','_blank')">📍</div>
+              <div class="edif-badge en-curso blink-soft">En curso</div>
+            </div>
+          </div>
+          <div class="edif-meta">
+            <div class="edif-dir">${dir}</div>
+            <div class="edif-admin">${admin}</div>
+          </div>
+          <div class="edif-info">
+            <div class="edif-visits">✓ ${visitas} visita${visitas>1?'s':''} este mes</div>
+            <div class="edif-info-txt naranja">Última: ${ultFecha ? ultFecha.split('-').reverse().join('/') : '—'}${ultHora ? ' · ' + ultHora : ''}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Render PENDIENTES
+  const listaPend = document.getElementById('prev-lista-pendientes');
+  if (pendientes.length === 0) {
+    listaPend.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">🎉</div><div class="empty-title">¡Todos al día!</div><div class="empty-sub">No hay preventivos pendientes</div></div>';
+  } else {
+    listaPend.innerHTML = pendientes.map(({ edif, ultFecha }) => {
+      const nombre = edif.Nombre || '';
+      const dir = edif['Dirección'] || '';
+      const admin = edif['Administración'] || '';
+      const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(dir + ', Mar del Plata')}`;
+      const ultLabel = ultFecha ? `Última visita: ${ultFecha.split('-').reverse().join('/')}` : 'Sin visitas registradas';
+      return `
+        <div class="edif-card pendiente" onclick="abrirPreventivo('${nombre.replace(/'/g,"\\'")}')">
+          <div class="edif-top">
+            <div class="edif-nombre">${nombre}</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <div class="edif-maps" onclick="event.stopPropagation();window.open('${mapsUrl}','_blank')">📍</div>
+              <div class="edif-badge pendiente blink">Pendiente</div>
+            </div>
+          </div>
+          <div class="edif-meta">
+            <div class="edif-dir">${dir}</div>
+            <div class="edif-admin">${admin}</div>
+          </div>
+          <div class="edif-info">
+            <div class="edif-info-txt rojo">${ultLabel}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+
+function abrirPreventivo(nombreEdif) {
+  // Abre nuevo registro con el edificio precargado
+  S.regActual = { edificio: nombreEdif, tipoVisita: 'Preventivo/Abono' };
+  document.getElementById('nr-edif-sub').textContent = nombreEdif;
+  ir('pantalla-nuevo-registro');
+}
+
+/* ══════════════════════════════════════════════════
    CARGA INICIAL DE DATOS
    ══════════════════════════════════════════════════ */
 async function cargarDatos() {
@@ -1019,8 +1260,9 @@ async function cargarDatos() {
     setLoading(100, '¡Listo!');
     setTimeout(() => {
       ocultarLoading();
-      ir('pantalla-dashboard');
       renderDashboard();
+      renderPreventivos();
+      ir('pantalla-dashboard');
     }, 400);
 
   } catch(e) {
