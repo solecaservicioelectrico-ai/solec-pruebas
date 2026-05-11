@@ -17,7 +17,7 @@
   --s1:      #161820;
   --s2:      #1e2130;
   --s3:      #272b40;
-  --borde:   #3a4060;
+  --borde:   #4a5278;
   --am:      #f5c518;
   --verde:   #00c896;
   --rojo:    #ff4757;
@@ -25,8 +25,8 @@
   --naranja: #ff8c42;
   --lila:    #a78bfa;
   --t:       #ffffff;
-  --t2:      #c8d0f0;
-  --t3:      #8090b8;
+  --t2:      #dde4ff;
+  --t3:      #9aa5c8;
   --r:       12px;
   --rs:      8px;
 }
@@ -544,11 +544,11 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.7</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.8</div>
     </div>
   </div>
 
-  <div class="scroll-body">
+  <div class="scroll-body" style="padding-bottom:100px">
 
     <!-- PREVENTIVOS -->
     <div class="sec-label">Preventivos · <span id="dash-mes-label">—</span></div>
@@ -611,7 +611,7 @@ body {
       <div class="reg-title">📋 Registros</div>
       <div class="reg-row">
         <div class="reg-btn nuevo" onclick="ir('pantalla-nuevo-registro')">
-          <div class="reg-icon">➕</div>
+          <div class="reg-icon">📝</div>
           <div class="reg-lbl">Nuevo Registro</div>
           <div class="reg-cnt">—</div>
         </div>
@@ -839,146 +839,136 @@ body {
   </div>
 
   <!-- CUERPO DEL FORMULARIO -->
-  <div class="scroll-body pb-100" id="nr-form-body">
+  <div class="scroll-body" id="nr-form-body" style="padding-bottom:160px">
 
     <!-- EDIFICIO -->
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:6px">Edificio</div>
     <div id="nr-edif-section">
-      <div class="sec-label">Edificio</div>
-      <div id="nr-edif-chip" style="background:linear-gradient(135deg,#1e1d10,var(--s1));border:1px solid rgba(245,197,24,.4);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="abrirBuscadorEdificio()">
+      <div id="nr-edif-chip" style="background:linear-gradient(135deg,#1e1d10,var(--s1));border:1px solid rgba(245,197,24,.5);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="abrirBuscadorEdificio()">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="font-size:24px">🏢</div>
+          <div style="font-size:26px">🏢</div>
           <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--am)" id="nr-edif-nombre">Tocá para elegir edificio</div>
-            <div style="font-size:12px;color:var(--t3);font-weight:600;margin-top:1px" id="nr-edif-dir">—</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--am)" id="nr-edif-nombre">Tocá para elegir</div>
+            <div style="font-size:13px;color:var(--t3);font-weight:600;margin-top:2px" id="nr-edif-dir">—</div>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--t3);font-weight:700">Cambiar</div>
+        <div style="font-size:12px;color:var(--t3);font-weight:700;border:1px solid var(--borde);border-radius:var(--rs);padding:4px 10px">Cambiar</div>
       </div>
-      <!-- Buscador edificio (colapsable) -->
       <div id="nr-buscador-edif" style="display:none;margin-top:8px">
         <div style="background:var(--s1);border:1px solid rgba(245,197,24,.4);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:8px">
           <span style="font-size:16px">🔍</span>
           <input id="nr-input-edif" type="text" placeholder="Buscar edificio..." oninput="buscarEdificio()"
-            style="flex:1;background:none;border:none;outline:none;font-size:14px;font-family:'Barlow',sans-serif;font-weight:600;color:var(--t2)">
+            style="flex:1;background:none;border:none;outline:none;font-size:15px;font-family:'Barlow',sans-serif;font-weight:600;color:var(--t2)">
         </div>
-        <div id="nr-lista-edif" style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--rs);overflow:hidden;margin-top:4px;max-height:200px;overflow-y:auto"></div>
+        <div id="nr-lista-edif" style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--rs);overflow:hidden;margin-top:4px;max-height:220px;overflow-y:auto"></div>
       </div>
     </div>
 
     <!-- FECHA -->
-    <div>
-      <div class="sec-label">Fecha</div>
-      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="document.getElementById('nr-input-fecha').showPicker()">
-        <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--t)" id="nr-fecha-display">—</div>
-          <div style="font-size:12px;color:var(--t3);font-weight:700;margin-top:2px" id="nr-fecha-dia">—</div>
-        </div>
-        <div style="font-size:11px;color:var(--t3);font-weight:600">Tocá para cambiar</div>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:6px;margin-top:4px">📅 Fecha</div>
+    <div style="background:var(--s1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="document.getElementById('nr-input-fecha').showPicker()">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#fff" id="nr-fecha-display">—</div>
+        <div style="font-size:13px;color:var(--t3);font-weight:700;margin-top:2px" id="nr-fecha-dia">—</div>
       </div>
-      <input type="date" id="nr-input-fecha" style="display:none" oninput="cambiarFechaRegistro(this.value)">
+      <div style="font-size:12px;color:var(--azul);font-weight:700">✎ Cambiar</div>
     </div>
+    <input type="date" id="nr-input-fecha" style="display:none" oninput="cambiarFechaRegistro(this.value)">
 
     <!-- HORARIO -->
-    <div>
-      <div class="sec-label">Horario de trabajo</div>
-      <div style="display:flex;gap:10px">
-        <div style="flex:1;background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px;text-align:center;cursor:pointer" onclick="document.getElementById('nr-input-inicio').showPicker()">
-          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:6px">Inicio</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--t);line-height:1" id="nr-hora-inicio-display">--:--</div>
-          <div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:4px">Tocá para ingresar</div>
-        </div>
-        <div style="flex:1;background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px;text-align:center;cursor:pointer" onclick="document.getElementById('nr-input-fin').showPicker()">
-          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:6px">Fin</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--t);line-height:1" id="nr-hora-fin-display">--:--</div>
-          <div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:4px">Tocá para ingresar</div>
-        </div>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:6px;margin-top:4px">🕐 Horario de trabajo</div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1;background:var(--s1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:14px 16px;text-align:center;cursor:pointer" onclick="document.getElementById('nr-input-inicio').showPicker()">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:8px">Inicio</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;line-height:1" id="nr-hora-inicio-display">--:--</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:6px">Tocá para ingresar</div>
       </div>
-      <input type="time" id="nr-input-inicio" style="display:none" oninput="nr_horaInicio=this.value;document.getElementById('nr-hora-inicio-display').textContent=this.value">
-      <input type="time" id="nr-input-fin"    style="display:none" oninput="nr_horaFin=this.value;document.getElementById('nr-hora-fin-display').textContent=this.value">
+      <div style="flex:1;background:var(--s1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:14px 16px;text-align:center;cursor:pointer" onclick="document.getElementById('nr-input-fin').showPicker()">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:8px">Fin</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;line-height:1" id="nr-hora-fin-display">--:--</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:6px">Tocá para ingresar</div>
+      </div>
     </div>
+    <input type="time" id="nr-input-inicio" style="display:none" oninput="nr_horaInicio=this.value;document.getElementById('nr-hora-inicio-display').textContent=this.value;document.getElementById('nr-hora-inicio-display').style.color='var(--am)'">
+    <input type="time" id="nr-input-fin"    style="display:none" oninput="nr_horaFin=this.value;document.getElementById('nr-hora-fin-display').textContent=this.value;document.getElementById('nr-hora-fin-display').style.color='var(--am)'">
 
     <!-- TIPO DE VISITA -->
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:6px;margin-top:4px">⚡ Tipo de visita</div>
     <div id="nr-tipo-section">
-      <div class="sec-label">Tipo de visita</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="nr-tipo-btn" data-tipo="Preventivo/Abono" onclick="elegirTipo(this)" style="background:var(--s1);border:2px solid rgba(0,200,150,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
-          <div style="font-size:26px;margin-bottom:6px">🔧</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--verde)">Preventivo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="nr-tipo-grid">
+        <div class="nr-tipo-btn" data-tipo="Preventivo/Abono" onclick="elegirTipo(this)"
+          style="background:var(--s1);border:2px solid rgba(0,200,150,.5);border-radius:var(--r);padding:20px 10px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="font-size:30px;margin-bottom:8px">🔧</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1.5px;color:var(--verde)">Preventivo</div>
         </div>
-        <div class="nr-tipo-btn" data-tipo="Service" onclick="elegirTipo(this)" style="background:var(--s1);border:2px solid rgba(74,158,255,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
-          <div style="font-size:26px;margin-bottom:6px">🔩</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--azul)">Service</div>
+        <div class="nr-tipo-btn" data-tipo="Service" onclick="elegirTipo(this)" id="nr-btn-service"
+          style="background:var(--s1);border:2px solid rgba(74,158,255,.5);border-radius:var(--r);padding:20px 10px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="font-size:30px;margin-bottom:8px">🔩</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1.5px;color:var(--azul)">Service</div>
         </div>
-        <div class="nr-tipo-btn" data-tipo="Urgencia" onclick="elegirTipo(this);preguntarUrgencia()" style="background:var(--s1);border:2px solid rgba(255,71,87,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
-          <div style="font-size:26px;margin-bottom:6px">🚨</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--rojo)">Urgencia</div>
+        <div class="nr-tipo-btn" data-tipo="Urgencia" onclick="elegirTipo(this);preguntarUrgencia()"
+          style="background:var(--s1);border:2px solid rgba(255,71,87,.5);border-radius:var(--r);padding:20px 10px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="font-size:30px;margin-bottom:8px">🚨</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1.5px;color:var(--rojo)">Urgencia</div>
         </div>
-        <div class="nr-tipo-btn" data-tipo="Visita técnica" onclick="elegirTipo(this)" style="background:var(--s1);border:2px solid rgba(167,139,250,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
-          <div style="font-size:26px;margin-bottom:6px">👁️</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--lila)">Visita técnica</div>
+        <div class="nr-tipo-btn" data-tipo="Visita técnica" onclick="elegirTipo(this)"
+          style="background:var(--s1);border:2px solid rgba(167,139,250,.5);border-radius:var(--r);padding:20px 10px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="font-size:30px;margin-bottom:8px">👁️</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1.5px;color:var(--lila)">Visita técnica</div>
         </div>
       </div>
-      <!-- Urgencia fuera de horario -->
-      <div id="nr-urgencia-horario" style="display:none;margin-top:8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.3);border-radius:var(--rs);padding:12px 14px">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--rojo);margin-bottom:8px">¿La urgencia es fuera del horario de trabajo?</div>
-        <div style="display:flex;gap:8px">
-          <div onclick="nr_urgenciaFuera=true;this.style.background='var(--rojo)';this.style.color='#fff';this.nextElementSibling.style.background='var(--s2)';this.nextElementSibling.style.color='var(--t3)'"
-            style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;text-align:center;font-size:13px;font-weight:800;color:var(--t3);cursor:pointer">
-            Sí, fuera de horario
-          </div>
-          <div onclick="nr_urgenciaFuera=false;this.style.background='var(--azul)';this.style.color='#fff';this.previousElementSibling.style.background='var(--s2)';this.previousElementSibling.style.color='var(--t3)'"
-            style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;text-align:center;font-size:13px;font-weight:800;color:var(--t3);cursor:pointer">
-            Dentro de horario
-          </div>
+      <!-- Urgencia dentro/fuera — chips discretos -->
+      <div id="nr-urgencia-horario" style="display:none;margin-top:8px;display:none;align-items:center;gap:8px">
+        <div style="font-size:12px;font-weight:800;color:var(--rojo)">¿Fuera de horario?</div>
+        <div onclick="nr_urgenciaFuera=true;this.style.background='var(--rojo)';this.style.color='#fff';document.getElementById('nr-urg-dentro').style.background='var(--s2)';document.getElementById('nr-urg-dentro').style.color='var(--t3)'"
+          style="background:var(--s2);border:1px solid rgba(255,71,87,.4);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;color:var(--t3);cursor:pointer">
+          Sí
+        </div>
+        <div id="nr-urg-dentro" onclick="nr_urgenciaFuera=false;this.style.background='var(--azul)';this.style.color='#fff';this.previousElementSibling.style.background='var(--s2)';this.previousElementSibling.style.color='var(--t3)'"
+          style="background:var(--s2);border:1px solid rgba(74,158,255,.4);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;color:var(--t3);cursor:pointer">
+          No
         </div>
       </div>
     </div>
 
     <!-- INTERVENCIONES -->
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="sec-label" style="margin-bottom:0">🛠️ Intervenciones</div>
-        <div onclick="abrirNuevaIntervencion()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋ Agregar</div>
-      </div>
-      <div id="nr-lista-intervenciones" style="display:flex;flex-direction:column;gap:8px">
-        <div style="background:var(--s2);border:1px dashed var(--borde);border-radius:var(--rs);padding:16px;text-align:center;font-size:13px;color:var(--t3);font-weight:600">
-          Sin intervenciones todavía. Tocá ＋ Agregar.
-        </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">🛠️ Intervenciones</div>
+      <div onclick="abrirNuevaIntervencion()" style="background:var(--am);border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;color:#000;cursor:pointer">＋ Agregar</div>
+    </div>
+    <div id="nr-lista-intervenciones" style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:var(--s2);border:1px dashed rgba(255,255,255,.15);border-radius:var(--rs);padding:16px;text-align:center;font-size:14px;color:var(--t3);font-weight:600">
+        Sin intervenciones todavía. Tocá ＋ Agregar.
       </div>
     </div>
 
     <!-- MATERIALES -->
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="sec-label" style="margin-bottom:0">📦 Materiales</div>
-        <div onclick="abrirBuscadorMateriales()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋ Agregar</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">📦 Materiales</div>
+      <div onclick="abrirBuscadorMateriales()" style="background:var(--am);border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;color:#000;cursor:pointer">＋ Agregar</div>
+    </div>
+    <div id="nr-lista-materiales" style="display:flex;flex-direction:column;gap:6px">
+      <div style="background:var(--s2);border:1px dashed rgba(255,255,255,.15);border-radius:var(--rs);padding:12px;text-align:center;font-size:14px;color:var(--t3);font-weight:600">
+        Sin materiales todavía.
       </div>
-      <div id="nr-lista-materiales" style="display:flex;flex-direction:column;gap:6px">
-        <div style="background:var(--s2);border:1px dashed var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-size:13px;color:var(--t3);font-weight:600">
-          Sin materiales todavía.
-        </div>
-      </div>
-      <!-- Botón escribir libremente -->
-      <div onclick="agregarMaterialLibre()" style="margin-top:8px;background:transparent;border:1px dashed rgba(74,158,255,.35);border-radius:var(--rs);padding:11px;font-size:13px;font-weight:800;color:var(--azul);cursor:pointer;text-align:center">
-        ✏️ Otro material (escribir libremente)
-      </div>
+    </div>
+    <div onclick="agregarMaterialLibre()" style="background:transparent;border:1px dashed rgba(74,158,255,.35);border-radius:var(--rs);padding:12px;font-size:13px;font-weight:800;color:var(--azul);cursor:pointer;text-align:center">
+      ✏️ Otro material (escribir libremente)
     </div>
 
     <!-- NOTA GENERAL -->
-    <div>
-      <div class="sec-label">📝 Nota general</div>
-      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden">
-        <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--s2);cursor:pointer" onclick="toggleNotaGeneral()">
-          <div style="font-size:13px;font-weight:800;color:var(--t3)" id="nr-nota-label">✏️ Agregar nota general (opcional)</div>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-top:4px;margin-bottom:6px">📝 Nota general</div>
+    <div style="background:var(--s1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);overflow:hidden">
+      <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--s2);cursor:pointer" onclick="toggleNotaGeneral()">
+        <div style="font-size:14px;font-weight:800;color:var(--t3)" id="nr-nota-label">✏️ Agregar nota (opcional)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div onclick="event.stopPropagation();dictarNota()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.4);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:var(--azul);cursor:pointer">🎙️ Dictar</div>
           <div style="font-size:14px;color:var(--t3)">⌄</div>
         </div>
-        <div id="nr-nota-body" style="display:none;padding:12px;gap:8px;flex-direction:column">
-          <div onclick="dictarNota()" style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.4);border-radius:var(--rs);padding:8px 14px;font-size:13px;font-weight:800;color:var(--azul);cursor:pointer;display:flex;align-items:center;gap:6px;align-self:flex-start">
-            🎙️ Dictar
-          </div>
-          <textarea id="nr-nota-texto" placeholder="Describí lo que encontraste o hiciste..." rows="3"
-            style="width:100%;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--t2);font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
-        </div>
+      </div>
+      <div id="nr-nota-body" style="display:none;padding:12px">
+        <textarea id="nr-nota-texto" placeholder="Describí lo que encontraste o hiciste..." rows="4"
+          style="width:100%;background:var(--s2);border:1px solid rgba(255,255,255,.1);border-radius:var(--rs);padding:12px;font-size:14px;color:#fff;font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
       </div>
     </div>
 
@@ -993,7 +983,7 @@ body {
   <!-- BOTTOM BAR -->
   <div class="bottom-bar">
     <div class="btn-naranja" onclick="cierreParcial()">💾 Parcial</div>
-    <div class="btn-am" onclick="finalizarRegistro()">Finalizar</div>
+    <div class="btn-am" onclick="finalizarRegistro()">✓ Finalizar</div>
   </div>
 
 </div>
@@ -1022,7 +1012,7 @@ body {
 </div>
 
 <!-- ══ MODAL NUEVA INTERVENCIÓN ══ -->
-<div id="modal-intervencion" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:400;flex-direction:column;max-width:430px;margin:0 auto">
+<div id="modal-intervencion" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:400;flex-direction:column;max-width:430px;margin:0 auto;left:50%;transform:translateX(-50%)">
   <div class="hdr" style="border-bottom-color:var(--am)">
     <div class="hdr-left">
       <div class="btn-back" onclick="cerrarIntervencion()">← Volver</div>
@@ -1031,35 +1021,32 @@ body {
         <div class="hdr-sub" id="int-edif-sub">—</div>
       </div>
     </div>
-    <div onclick="guardarIntervencion()" style="background:var(--verde);border:none;border-radius:var(--rs);padding:10px 16px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:#000;cursor:pointer;font-weight:900">✓ Listo</div>
+    <div onclick="guardarIntervencion()" style="background:var(--verde);border:none;border-radius:var(--rs);padding:10px 16px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:#000;cursor:pointer;font-weight:900">✓ Listo</div>
   </div>
 
-  <div class="scroll-body pb-100">
+  <div class="scroll-body" style="padding-bottom:30px">
 
-    <!-- CATEGORÍAS -->
-    <div>
-      <div class="sec-label">Categoría</div>
-      <div id="int-cat-fila" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px"></div>
-    </div>
+    <!-- CATEGORÍAS — grilla 2x2 -->
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">Categoría</div>
+    <div id="int-cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
 
     <!-- SUBCATEGORÍA -->
     <div id="int-sec-sub" style="display:none">
-      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
-      <div class="sec-label">Subcategoría</div>
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">Subcategoría</div>
       <div id="int-subcat-wrap" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-      <!-- Flujo horizontal (energía/bombas) -->
       <div id="int-flujo-wrap" style="display:none;flex-direction:column;gap:8px">
-        <div style="font-size:10px;color:var(--t3);font-weight:600;text-align:center">← Deslizá para ver el recorrido →</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600;text-align:center">← Deslizá para ver el recorrido →</div>
         <div id="int-flujo-scroll" style="display:flex;gap:0;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;align-items:center"></div>
       </div>
     </div>
 
     <!-- EVENTO -->
     <div id="int-sec-evento" style="display:none">
-      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
-      <div class="sec-label">Evento</div>
-      <div id="int-evento-btn" onclick="toggleEventoDropdown()" style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
-        <div style="font-size:14px;font-weight:700;color:var(--t3)" id="int-evento-val">— Qué se hizo —</div>
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">Evento</div>
+      <div id="int-evento-btn" onclick="toggleEventoDropdown()" style="background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:var(--rs);padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div style="font-size:16px;font-weight:700;color:var(--t3)" id="int-evento-val">— Qué se hizo —</div>
         <div style="font-size:18px;color:var(--t3)">⌄</div>
       </div>
       <div id="int-evento-list" style="display:none;background:var(--s2);border:1px solid var(--am);border-radius:var(--rs);overflow:hidden;margin-top:4px"></div>
@@ -1067,47 +1054,56 @@ body {
 
     <!-- COMPONENTES -->
     <div id="int-sec-comp" style="display:none">
-      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="sec-label" style="margin-bottom:0">Componentes</div>
-        <div onclick="agregarComponenteModal()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋</div>
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">Componentes</div>
+        <div onclick="agregarComponenteModal()" style="background:var(--am);border:none;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;color:#000;cursor:pointer">＋ Agregar</div>
       </div>
       <div id="int-comp-lista" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
+    <!-- UBICACIÓN — campo libre -->
+    <div id="int-sec-ubic" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">📍 Ubicación</div>
+      <div style="background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:center;gap:8px">
+        <input id="int-ubic-txt" type="text" placeholder="Ej: Piso 4 · pasillo, Cochera subsuelo, Hall PB..."
+          style="flex:1;background:none;border:none;outline:none;font-size:15px;font-family:'Barlow',sans-serif;font-weight:600;color:#fff">
+        <div onclick="dictarUbicacion()" style="font-size:18px;cursor:pointer;color:var(--azul)">🎙️</div>
+      </div>
+    </div>
+
     <!-- MODIFICADORES -->
     <div id="int-sec-modif" style="display:none">
-      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="sec-label" style="margin-bottom:0">Modificadores</div>
-        <div onclick="agregarModifModal()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋</div>
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3)">Modificadores</div>
+        <div onclick="abrirListaModif()" style="background:var(--am);border:none;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;color:#000;cursor:pointer">＋ Agregar</div>
       </div>
       <div id="int-modif-lista" style="display:flex;flex-direction:column;gap:6px"></div>
+      <!-- Lista desplegable modificadores -->
+      <div id="int-modif-dropdown" style="display:none;background:var(--s2);border:1px solid var(--am);border-radius:var(--rs);overflow:hidden;margin-top:6px"></div>
     </div>
 
     <!-- CONDICIÓN ESPECIAL -->
     <div id="int-sec-cond" style="display:none">
-      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
-      <div class="sec-label">Condición especial (opcional)</div>
-      <div id="int-cond-btn" onclick="toggleCondicion()" style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
-        <div style="font-size:13px;font-weight:800;color:var(--t3)" id="int-cond-txt">⚠️ Sin condición especial</div>
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">Condición especial (opcional)</div>
+      <div id="int-cond-btn" onclick="toggleCondicion()" style="background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div style="font-size:15px;font-weight:800;color:var(--t3)" id="int-cond-txt">⚠️ Sin condición especial</div>
         <div style="font-size:16px;color:var(--t3)">▶</div>
       </div>
-      <div id="int-cond-lista" style="display:none;margin-top:6px;display:flex;flex-direction:column;gap:6px"></div>
+      <div id="int-cond-lista" style="display:none;margin-top:6px;flex-direction:column;gap:6px"></div>
     </div>
 
-    <!-- NOTA INTERVENCIÓN -->
+    <!-- NOTA LIBRE -->
     <div id="int-sec-nota" style="display:none">
-      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
-      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden">
-        <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--s2)" onclick="toggleNotaInterv()">
-          <div style="font-size:13px;font-weight:800;color:var(--t3)">✏️ Nota libre (opcional)</div>
-          <div style="font-size:14px;color:var(--t3)">⌄</div>
-        </div>
-        <div id="int-nota-body" style="display:none;padding:12px;flex-direction:column;gap:8px">
-          <textarea id="int-nota-txt" placeholder="Ubicación, detalle, observaciones..." rows="3"
-            style="width:100%;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--t2);font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
-        </div>
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">✏️ Nota libre (opcional)</div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <textarea id="int-nota-txt" placeholder="Describí lo que hiciste, lo que encontraste, cualquier detalle relevante..." rows="3"
+          style="flex:1;background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:var(--rs);padding:12px;font-size:14px;color:#fff;font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
+        <div onclick="dictarNotaInterv()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.4);border-radius:var(--rs);padding:10px;font-size:20px;cursor:pointer;flex-shrink:0">🎙️</div>
       </div>
     </div>
 
@@ -1519,19 +1515,23 @@ function abrirNuevoRegistro(edif) {
 
 function setEdificioRegistro(edifObj) {
   if (!edifObj) {
-    document.getElementById('nr-edif-nombre').textContent = 'Tocá para elegir edificio';
+    document.getElementById('nr-edif-nombre').textContent = 'Tocá para elegir';
     document.getElementById('nr-edif-dir').textContent = '—';
     document.getElementById('nr-edif-sub').textContent = '—';
     return;
   }
   const nombre = edifObj.Nombre || edifObj['Nombre'] || '';
   const dir = edifObj['Dirección'] || '';
+  const esAbonado = String(edifObj['Abonado']||'').toLowerCase() === 'si';
   document.getElementById('nr-edif-nombre').textContent = nombre;
   document.getElementById('nr-edif-dir').textContent = dir;
   document.getElementById('nr-edif-sub').textContent = nombre;
   S.regActual = S.regActual || {};
   S.regActual.edificio = nombre;
   S.regActual.edifObj = edifObj;
+  // Ocultar Service si es abonado
+  const btnService = document.getElementById('nr-btn-service');
+  if (btnService) btnService.style.display = esAbonado ? 'none' : '';
 }
 
 function cancelarRegistro() {
@@ -1691,34 +1691,47 @@ function abrirModalIntervencion() {
   document.getElementById('int-edif-sub').textContent = S.regActual?.edificio || '—';
   renderCategorias();
   // Reset secciones
-  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
-    document.getElementById(id).style.display = 'none';
+  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
   });
   document.getElementById('int-evento-val').textContent = '— Qué se hizo —';
+  document.getElementById('int-evento-val').style.color = 'var(--t3)';
   document.getElementById('int-evento-list').style.display = 'none';
   document.getElementById('int-comp-lista').innerHTML = '';
   document.getElementById('int-modif-lista').innerHTML = '';
+  const dd = document.getElementById('int-modif-dropdown');
+  if (dd) dd.style.display = 'none';
   document.getElementById('int-cond-txt').textContent = '⚠️ Sin condición especial';
+  document.getElementById('int-cond-txt').style.color = 'var(--t3)';
   document.getElementById('int-cond-lista').style.display = 'none';
-  document.getElementById('int-nota-body').style.display = 'none';
   document.getElementById('int-nota-txt').value = int_nota;
+  const ubicInput = document.getElementById('int-ubic-txt');
+  if (ubicInput) ubicInput.value = '';
 
   // Si es edición, restaurar selecciones
   if (int_editIdx >= 0) {
     renderSubcategorias(int_catk);
     renderEventos(int_subcategoria);
     document.getElementById('int-evento-val').textContent = int_evento;
+    document.getElementById('int-evento-val').style.color = '#fff';
     renderComponentes();
     renderModificadores();
     if (int_condicion) {
       document.getElementById('int-cond-txt').textContent = '⚠️ ' + int_condicion;
+      document.getElementById('int-cond-txt').style.color = 'var(--rojo)';
     }
-    ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
-      document.getElementById(id).style.display = 'block';
+    ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'block';
     });
   }
   window.scrollTo(0,0);
 }
+
+function dictarUbicacion() { toast('Dictado de ubicación — próximamente 🎙️', ''); }
+function dictarNotaInterv() { toast('Dictado de nota — próximamente 🎙️', ''); }
+function dictarNota() { toast('Dictado de nota — próximamente 🎙️', ''); }
 
 function cerrarIntervencion() {
   document.getElementById('modal-intervencion').style.display = 'none';
@@ -1751,19 +1764,27 @@ function guardarIntervencion() {
 
 /* ── Categorías ── */
 function renderCategorias() {
-  const fila = document.getElementById('int-cat-fila');
+  const grid = document.getElementById('int-cat-grid');
+  if (!grid) return;
   // Obtener categorías únicas de Config_Categorias
   const cats = {};
   S.categorias.forEach(c => {
     if (c.catk && !cats[c.catk]) cats[c.catk] = { catk:c.catk, emoji:c.emoji||'🔧', label:c.categoria||c.catk };
   });
-  fila.innerHTML = Object.values(cats).map(c => `
-    <div onclick="elegirCategoria('${c.catk}','${(c.label).replace(/'/g,"\\'")}',this)"
-      class="int-cat-chip"
-      style="flex-shrink:0;background:var(--s1);border:2px solid var(--borde);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap${int_catk===c.catk?';border-color:var(--am);background:rgba(245,197,24,.08)':''}">
-      <span style="font-size:20px">${c.emoji}</span>
-      <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;color:${int_catk===c.catk?'var(--am)':'var(--t2)'}">${c.label}</span>
-    </div>`).join('');
+  const colores = { lu:'var(--am)', en:'var(--naranja)', bo:'var(--azul)', se:'var(--verde)', vt:'var(--lila)' };
+  const borders = { lu:'rgba(245,197,24,.5)', en:'rgba(255,140,66,.5)', bo:'rgba(74,158,255,.5)', se:'rgba(0,200,150,.5)', vt:'rgba(167,139,250,.5)' };
+  grid.innerHTML = Object.values(cats).map(c => {
+    const color = colores[c.catk] || 'var(--t2)';
+    const border = borders[c.catk] || 'var(--borde)';
+    const sel = int_catk === c.catk;
+    return `
+      <div onclick="elegirCategoria('${c.catk}','${(c.label).replace(/'/g,"\\'")}',this)"
+        class="int-cat-chip"
+        style="background:var(--s1);border:2px solid ${sel?color:border};border-radius:var(--r);padding:20px 10px;text-align:center;cursor:pointer;transition:all .15s${sel?';background:rgba(255,255,255,.05)':''}">
+        <div style="font-size:30px;margin-bottom:8px">${c.emoji}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:${sel?color:'var(--t2)'}${sel?';text-shadow:0 0 10px '+color:''}">${c.label}</div>
+      </div>`;
+  }).join('');
 }
 
 function elegirCategoria(catk, label, el) {
@@ -1868,19 +1889,46 @@ function toggleEventoDropdown() {
 function elegirEvento(ev) {
   int_evento = ev;
   document.getElementById('int-evento-val').textContent = ev;
-  document.getElementById('int-evento-val').style.color = 'var(--t2)';
+  document.getElementById('int-evento-val').style.color = '#fff';
   document.getElementById('int-evento-list').style.display = 'none';
   // Mostrar componentes
   const comps = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === ev).map(c => c.componente).filter(Boolean))];
   if (comps.length > 0 && int_componentes.length === 0) {
-    // Agregar primer componente automáticamente con cantidad 1
     int_componentes = [{ nombre: comps[0], unidad: 'u', qty: 1, opciones: comps }];
   }
   renderComponentes();
   renderModificadores();
-  ['int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+  ['int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
     document.getElementById(id).style.display = 'block';
   });
+  // Limpiar ubicación
+  const ubicInput = document.getElementById('int-ubic-txt');
+  if (ubicInput && !int_nota) ubicInput.value = '';
+}
+
+function abrirListaModif() {
+  const dropdown = document.getElementById('int-modif-dropdown');
+  if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+    dropdown.style.display = 'block';
+    dropdown.innerHTML = S.modificadores.map(m => {
+      const nombre = m.Nombre || m.nombre || 'Modificador';
+      const unidad = m.Unidad || m.unidad || 'u';
+      return `
+        <div onclick="seleccionarModif('${nombre.replace(/'/g,"\\'")}','${unidad}')"
+          style="padding:13px 16px;border-bottom:1px solid var(--borde);font-size:15px;font-weight:700;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+          ${nombre}
+          <span style="font-size:12px;color:var(--t3);font-weight:800">${unidad}</span>
+        </div>`;
+    }).join('');
+  } else {
+    dropdown.style.display = 'none';
+  }
+}
+
+function seleccionarModif(nombre, unidad) {
+  int_modificadores.push({ nombre, unidad, qty: 1 });
+  renderModificadores();
+  document.getElementById('int-modif-dropdown').style.display = 'none';
 }
 
 /* ── Componentes ── */
