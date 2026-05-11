@@ -544,7 +544,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.6</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.7</div>
     </div>
   </div>
 
@@ -816,13 +816,302 @@ body {
 </div>
 
 <div class="pantalla" id="pantalla-nuevo-registro">
-  <div class="hdr">
+
+  <!-- HEADER -->
+  <div class="hdr" style="border-bottom-color:var(--am)">
     <div class="hdr-left">
-      <div class="btn-back" onclick="ir('pantalla-dashboard')">← Cancelar</div>
-      <div><div class="hdr-title">Nuevo Registro</div><div class="hdr-sub" id="nr-edif-sub">—</div></div>
+      <div class="btn-back" id="nr-btn-cancelar" onclick="cancelarRegistro()">Cancelar</div>
+      <div>
+        <div class="hdr-title" id="nr-titulo">Nuevo Registro</div>
+        <div class="hdr-sub" id="nr-edif-sub">—</div>
+      </div>
     </div>
   </div>
-  <div class="scroll-body"><div class="empty-state"><div class="spinner"></div><div class="empty-title">Cargando...</div></div></div>
+
+  <!-- HISTORIAL JORNADAS ANTERIORES (solo en modo parcial) -->
+  <div id="nr-historial-parcial" style="display:none">
+    <div style="margin:10px 12px 0;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.3);border-radius:var(--r);padding:12px 14px">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--naranja);margin-bottom:8px">
+        💾 Jornadas anteriores
+      </div>
+      <div id="nr-jornadas-prev" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+  </div>
+
+  <!-- CUERPO DEL FORMULARIO -->
+  <div class="scroll-body pb-100" id="nr-form-body">
+
+    <!-- EDIFICIO -->
+    <div id="nr-edif-section">
+      <div class="sec-label">Edificio</div>
+      <div id="nr-edif-chip" style="background:linear-gradient(135deg,#1e1d10,var(--s1));border:1px solid rgba(245,197,24,.4);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="abrirBuscadorEdificio()">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:24px">🏢</div>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--am)" id="nr-edif-nombre">Tocá para elegir edificio</div>
+            <div style="font-size:12px;color:var(--t3);font-weight:600;margin-top:1px" id="nr-edif-dir">—</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);font-weight:700">Cambiar</div>
+      </div>
+      <!-- Buscador edificio (colapsable) -->
+      <div id="nr-buscador-edif" style="display:none;margin-top:8px">
+        <div style="background:var(--s1);border:1px solid rgba(245,197,24,.4);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">🔍</span>
+          <input id="nr-input-edif" type="text" placeholder="Buscar edificio..." oninput="buscarEdificio()"
+            style="flex:1;background:none;border:none;outline:none;font-size:14px;font-family:'Barlow',sans-serif;font-weight:600;color:var(--t2)">
+        </div>
+        <div id="nr-lista-edif" style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--rs);overflow:hidden;margin-top:4px;max-height:200px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- FECHA -->
+    <div>
+      <div class="sec-label">Fecha</div>
+      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="document.getElementById('nr-input-fecha').showPicker()">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--t)" id="nr-fecha-display">—</div>
+          <div style="font-size:12px;color:var(--t3);font-weight:700;margin-top:2px" id="nr-fecha-dia">—</div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Tocá para cambiar</div>
+      </div>
+      <input type="date" id="nr-input-fecha" style="display:none" oninput="cambiarFechaRegistro(this.value)">
+    </div>
+
+    <!-- HORARIO -->
+    <div>
+      <div class="sec-label">Horario de trabajo</div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px;text-align:center;cursor:pointer" onclick="document.getElementById('nr-input-inicio').showPicker()">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:6px">Inicio</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--t);line-height:1" id="nr-hora-inicio-display">--:--</div>
+          <div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:4px">Tocá para ingresar</div>
+        </div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);padding:14px 16px;text-align:center;cursor:pointer" onclick="document.getElementById('nr-input-fin').showPicker()">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:6px">Fin</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--t);line-height:1" id="nr-hora-fin-display">--:--</div>
+          <div style="font-size:10px;color:var(--t3);font-weight:600;margin-top:4px">Tocá para ingresar</div>
+        </div>
+      </div>
+      <input type="time" id="nr-input-inicio" style="display:none" oninput="nr_horaInicio=this.value;document.getElementById('nr-hora-inicio-display').textContent=this.value">
+      <input type="time" id="nr-input-fin"    style="display:none" oninput="nr_horaFin=this.value;document.getElementById('nr-hora-fin-display').textContent=this.value">
+    </div>
+
+    <!-- TIPO DE VISITA -->
+    <div id="nr-tipo-section">
+      <div class="sec-label">Tipo de visita</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="nr-tipo-btn" data-tipo="Preventivo/Abono" onclick="elegirTipo(this)" style="background:var(--s1);border:2px solid rgba(0,200,150,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
+          <div style="font-size:26px;margin-bottom:6px">🔧</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--verde)">Preventivo</div>
+        </div>
+        <div class="nr-tipo-btn" data-tipo="Service" onclick="elegirTipo(this)" style="background:var(--s1);border:2px solid rgba(74,158,255,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
+          <div style="font-size:26px;margin-bottom:6px">🔩</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--azul)">Service</div>
+        </div>
+        <div class="nr-tipo-btn" data-tipo="Urgencia" onclick="elegirTipo(this);preguntarUrgencia()" style="background:var(--s1);border:2px solid rgba(255,71,87,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
+          <div style="font-size:26px;margin-bottom:6px">🚨</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--rojo)">Urgencia</div>
+        </div>
+        <div class="nr-tipo-btn" data-tipo="Visita técnica" onclick="elegirTipo(this)" style="background:var(--s1);border:2px solid rgba(167,139,250,.4);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer">
+          <div style="font-size:26px;margin-bottom:6px">👁️</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--lila)">Visita técnica</div>
+        </div>
+      </div>
+      <!-- Urgencia fuera de horario -->
+      <div id="nr-urgencia-horario" style="display:none;margin-top:8px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.3);border-radius:var(--rs);padding:12px 14px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--rojo);margin-bottom:8px">¿La urgencia es fuera del horario de trabajo?</div>
+        <div style="display:flex;gap:8px">
+          <div onclick="nr_urgenciaFuera=true;this.style.background='var(--rojo)';this.style.color='#fff';this.nextElementSibling.style.background='var(--s2)';this.nextElementSibling.style.color='var(--t3)'"
+            style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;text-align:center;font-size:13px;font-weight:800;color:var(--t3);cursor:pointer">
+            Sí, fuera de horario
+          </div>
+          <div onclick="nr_urgenciaFuera=false;this.style.background='var(--azul)';this.style.color='#fff';this.previousElementSibling.style.background='var(--s2)';this.previousElementSibling.style.color='var(--t3)'"
+            style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;text-align:center;font-size:13px;font-weight:800;color:var(--t3);cursor:pointer">
+            Dentro de horario
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERVENCIONES -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sec-label" style="margin-bottom:0">🛠️ Intervenciones</div>
+        <div onclick="abrirNuevaIntervencion()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋ Agregar</div>
+      </div>
+      <div id="nr-lista-intervenciones" style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:var(--s2);border:1px dashed var(--borde);border-radius:var(--rs);padding:16px;text-align:center;font-size:13px;color:var(--t3);font-weight:600">
+          Sin intervenciones todavía. Tocá ＋ Agregar.
+        </div>
+      </div>
+    </div>
+
+    <!-- MATERIALES -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sec-label" style="margin-bottom:0">📦 Materiales</div>
+        <div onclick="abrirBuscadorMateriales()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋ Agregar</div>
+      </div>
+      <div id="nr-lista-materiales" style="display:flex;flex-direction:column;gap:6px">
+        <div style="background:var(--s2);border:1px dashed var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-size:13px;color:var(--t3);font-weight:600">
+          Sin materiales todavía.
+        </div>
+      </div>
+      <!-- Botón escribir libremente -->
+      <div onclick="agregarMaterialLibre()" style="margin-top:8px;background:transparent;border:1px dashed rgba(74,158,255,.35);border-radius:var(--rs);padding:11px;font-size:13px;font-weight:800;color:var(--azul);cursor:pointer;text-align:center">
+        ✏️ Otro material (escribir libremente)
+      </div>
+    </div>
+
+    <!-- NOTA GENERAL -->
+    <div>
+      <div class="sec-label">📝 Nota general</div>
+      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden">
+        <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--s2);cursor:pointer" onclick="toggleNotaGeneral()">
+          <div style="font-size:13px;font-weight:800;color:var(--t3)" id="nr-nota-label">✏️ Agregar nota general (opcional)</div>
+          <div style="font-size:14px;color:var(--t3)">⌄</div>
+        </div>
+        <div id="nr-nota-body" style="display:none;padding:12px;gap:8px;flex-direction:column">
+          <div onclick="dictarNota()" style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.4);border-radius:var(--rs);padding:8px 14px;font-size:13px;font-weight:800;color:var(--azul);cursor:pointer;display:flex;align-items:center;gap:6px;align-self:flex-start">
+            🎙️ Dictar
+          </div>
+          <textarea id="nr-nota-texto" placeholder="Describí lo que encontraste o hiciste..." rows="3"
+            style="width:100%;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--t2);font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scroll-body -->
+
+  <!-- FAB INFORME TÉCNICO -->
+  <div class="fab" style="bottom:90px;right:16px;background:var(--azul);box-shadow:0 4px 20px rgba(74,158,255,.4)" onclick="toast('Informe técnico — próximamente','ok')">
+    <span style="font-size:16px">📋</span>
+    <span class="fab-label">Informe Técnico</span>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="btn-naranja" onclick="cierreParcial()">💾 Parcial</div>
+    <div class="btn-am" onclick="finalizarRegistro()">Finalizar</div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL BÚSQUEDA MATERIALES ══ -->
+<div id="modal-materiales" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;flex-direction:column">
+  <div style="background:var(--s1);border-top:3px solid var(--am);border-radius:20px 20px 0 0;position:absolute;bottom:0;width:100%;max-width:430px;left:50%;transform:translateX(-50%);max-height:85vh;display:flex;flex-direction:column">
+    <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borde)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--am)">🧰 Materiales</div>
+      <div onclick="cerrarBuscadorMateriales()" style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:6px 12px;font-size:12px;font-weight:800;color:var(--t3);cursor:pointer">✕ Cerrar</div>
+    </div>
+    <div style="padding:10px 12px">
+      <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🔍</span>
+        <input id="mat-input" type="text" placeholder="Buscar material..." oninput="filtrarMateriales()"
+          style="flex:1;background:none;border:none;outline:none;font-size:14px;font-family:'Barlow',sans-serif;font-weight:600;color:var(--t2)">
+      </div>
+    </div>
+    <div id="mat-lista-modal" style="overflow-y:auto;flex:1;padding:0 12px 20px"></div>
+    <div style="padding:10px 12px;border-top:1px solid var(--borde)">
+      <div id="mat-btn-confirmar" onclick="confirmarMateriales()" style="background:var(--am);border:none;border-radius:var(--r);padding:14px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#000;cursor:pointer;text-align:center;font-weight:900;opacity:.3;pointer-events:none">
+        Agregar al registro
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL NUEVA INTERVENCIÓN ══ -->
+<div id="modal-intervencion" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:400;flex-direction:column;max-width:430px;margin:0 auto">
+  <div class="hdr" style="border-bottom-color:var(--am)">
+    <div class="hdr-left">
+      <div class="btn-back" onclick="cerrarIntervencion()">← Volver</div>
+      <div>
+        <div class="hdr-title">Nueva Intervención</div>
+        <div class="hdr-sub" id="int-edif-sub">—</div>
+      </div>
+    </div>
+    <div onclick="guardarIntervencion()" style="background:var(--verde);border:none;border-radius:var(--rs);padding:10px 16px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:#000;cursor:pointer;font-weight:900">✓ Listo</div>
+  </div>
+
+  <div class="scroll-body pb-100">
+
+    <!-- CATEGORÍAS -->
+    <div>
+      <div class="sec-label">Categoría</div>
+      <div id="int-cat-fila" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px"></div>
+    </div>
+
+    <!-- SUBCATEGORÍA -->
+    <div id="int-sec-sub" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div class="sec-label">Subcategoría</div>
+      <div id="int-subcat-wrap" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <!-- Flujo horizontal (energía/bombas) -->
+      <div id="int-flujo-wrap" style="display:none;flex-direction:column;gap:8px">
+        <div style="font-size:10px;color:var(--t3);font-weight:600;text-align:center">← Deslizá para ver el recorrido →</div>
+        <div id="int-flujo-scroll" style="display:flex;gap:0;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;align-items:center"></div>
+      </div>
+    </div>
+
+    <!-- EVENTO -->
+    <div id="int-sec-evento" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div class="sec-label">Evento</div>
+      <div id="int-evento-btn" onclick="toggleEventoDropdown()" style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div style="font-size:14px;font-weight:700;color:var(--t3)" id="int-evento-val">— Qué se hizo —</div>
+        <div style="font-size:18px;color:var(--t3)">⌄</div>
+      </div>
+      <div id="int-evento-list" style="display:none;background:var(--s2);border:1px solid var(--am);border-radius:var(--rs);overflow:hidden;margin-top:4px"></div>
+    </div>
+
+    <!-- COMPONENTES -->
+    <div id="int-sec-comp" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sec-label" style="margin-bottom:0">Componentes</div>
+        <div onclick="agregarComponenteModal()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋</div>
+      </div>
+      <div id="int-comp-lista" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <!-- MODIFICADORES -->
+    <div id="int-sec-modif" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sec-label" style="margin-bottom:0">Modificadores</div>
+        <div onclick="agregarModifModal()" style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.4);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--am);cursor:pointer">＋</div>
+      </div>
+      <div id="int-modif-lista" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <!-- CONDICIÓN ESPECIAL -->
+    <div id="int-sec-cond" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div class="sec-label">Condición especial (opcional)</div>
+      <div id="int-cond-btn" onclick="toggleCondicion()" style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div style="font-size:13px;font-weight:800;color:var(--t3)" id="int-cond-txt">⚠️ Sin condición especial</div>
+        <div style="font-size:16px;color:var(--t3)">▶</div>
+      </div>
+      <div id="int-cond-lista" style="display:none;margin-top:6px;display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <!-- NOTA INTERVENCIÓN -->
+    <div id="int-sec-nota" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:0 -12px"></div>
+      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden">
+        <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--s2)" onclick="toggleNotaInterv()">
+          <div style="font-size:13px;font-weight:800;color:var(--t3)">✏️ Nota libre (opcional)</div>
+          <div style="font-size:14px;color:var(--t3)">⌄</div>
+        </div>
+        <div id="int-nota-body" style="display:none;padding:12px;flex-direction:column;gap:8px">
+          <textarea id="int-nota-txt" placeholder="Ubicación, detalle, observaciones..." rows="3"
+            style="width:100%;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--t2);font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <div class="pantalla" id="pantalla-historial">
@@ -900,6 +1189,10 @@ function ir(id) {
   siguiente.classList.add('activa');
   S.pantallaActual = id;
   window.scrollTo(0,0);
+  // Acciones al entrar a una pantalla
+  if (id === 'pantalla-nuevo-registro') {
+    abrirNuevoRegistro();
+  }
 }
 
 /* ══════════════════════════════════════════════════
@@ -1151,6 +1444,733 @@ function renderGraficoHoras(dias) {
     <div class="hh-item ext"><div class="hh-num">${fmt(hoyData.minsExt)}</div><div class="hh-lbl">Extra</div></div>
     <div class="hh-item urg"><div class="hh-num">${urgHoy}</div><div class="hh-lbl">Urgencias</div></div>
   `;
+}
+
+/* ══════════════════════════════════════════════════
+   NUEVO REGISTRO — estado y lógica
+   ══════════════════════════════════════════════════ */
+var nr_fecha = '';
+var nr_horaInicio = '';
+var nr_horaFin = '';
+var nr_tipoVisita = '';
+var nr_urgenciaFuera = false;
+var nr_intervenciones = [];  // [{catk,categoria,subcategoria,evento,componentes:[],modificadores:[],condicion,nota}]
+var nr_materiales = [];      // [{nombre,unidad,cantidad}]
+var nr_nota = '';
+var nr_matSeleccionados = {};
+
+// Estado intervención en edición
+var int_catk = '';
+var int_categoria = '';
+var int_subcategoria = '';
+var int_evento = '';
+var int_componentes = [];
+var int_modificadores = [];
+var int_condicion = '';
+var int_nota = '';
+var int_editIdx = -1; // -1 = nueva
+
+function abrirNuevoRegistro(edif) {
+  // Reset estado
+  nr_fecha = fechaHoy();
+  nr_horaInicio = '';
+  nr_horaFin = '';
+  nr_tipoVisita = S.regActual?.tipoVisita || '';
+  nr_urgenciaFuera = false;
+  nr_intervenciones = [];
+  nr_materiales = [];
+  nr_nota = '';
+
+  // UI
+  const edifObj = edif || S.edificios.find(e => e.Nombre === S.regActual?.edificio);
+  setEdificioRegistro(edifObj);
+
+  // Fecha
+  document.getElementById('nr-input-fecha').value = nr_fecha;
+  cambiarFechaRegistro(nr_fecha);
+
+  // Tipo precargado
+  if (nr_tipoVisita) {
+    document.querySelectorAll('.nr-tipo-btn').forEach(b => {
+      if (b.dataset.tipo === nr_tipoVisita) {
+        b.style.borderWidth = '3px';
+        b.style.opacity = '1';
+      } else {
+        b.style.opacity = '.5';
+      }
+    });
+  }
+
+  // Modo parcial
+  const esParcial = S.regActual?.esParcial;
+  document.getElementById('nr-historial-parcial').style.display = esParcial ? 'block' : 'none';
+  document.getElementById('nr-titulo').textContent = esParcial ? 'Continuar Parcial' : 'Nuevo Registro';
+
+  if (esParcial && S.regActual.dataParcial) {
+    renderJornadasPrevias(S.regActual.dataParcial);
+  }
+
+  renderIntervenciones();
+  renderMaterialesRegistro();
+  document.getElementById('nr-nota-texto').value = '';
+  document.getElementById('nr-nota-body').style.display = 'none';
+  document.getElementById('nr-nota-label').textContent = '✏️ Agregar nota general (opcional)';
+}
+
+function setEdificioRegistro(edifObj) {
+  if (!edifObj) {
+    document.getElementById('nr-edif-nombre').textContent = 'Tocá para elegir edificio';
+    document.getElementById('nr-edif-dir').textContent = '—';
+    document.getElementById('nr-edif-sub').textContent = '—';
+    return;
+  }
+  const nombre = edifObj.Nombre || edifObj['Nombre'] || '';
+  const dir = edifObj['Dirección'] || '';
+  document.getElementById('nr-edif-nombre').textContent = nombre;
+  document.getElementById('nr-edif-dir').textContent = dir;
+  document.getElementById('nr-edif-sub').textContent = nombre;
+  S.regActual = S.regActual || {};
+  S.regActual.edificio = nombre;
+  S.regActual.edifObj = edifObj;
+}
+
+function cancelarRegistro() {
+  S.regActual = null;
+  ir('pantalla-dashboard');
+}
+
+/* ── Fecha ── */
+function cambiarFechaRegistro(val) {
+  nr_fecha = val;
+  if (!val) return;
+  const d = new Date(val + 'T00:00:00');
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('nr-fecha-display').textContent = `${d.getDate()} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}`;
+  document.getElementById('nr-fecha-dia').textContent = `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}`;
+}
+
+/* ── Tipo visita ── */
+function elegirTipo(btn) {
+  nr_tipoVisita = btn.dataset.tipo;
+  document.querySelectorAll('.nr-tipo-btn').forEach(b => {
+    b.style.borderWidth = '2px';
+    b.style.opacity = '.6';
+  });
+  btn.style.borderWidth = '3px';
+  btn.style.opacity = '1';
+  document.getElementById('nr-urgencia-horario').style.display = 'none';
+}
+
+function preguntarUrgencia() {
+  document.getElementById('nr-urgencia-horario').style.display = 'block';
+}
+
+/* ── Buscador edificio ── */
+function abrirBuscadorEdificio() {
+  const buscador = document.getElementById('nr-buscador-edif');
+  buscador.style.display = buscador.style.display === 'none' ? 'block' : 'none';
+  if (buscador.style.display === 'block') {
+    document.getElementById('nr-input-edif').focus();
+    buscarEdificio();
+  }
+}
+
+function buscarEdificio() {
+  const q = nn(document.getElementById('nr-input-edif').value);
+  const lista = document.getElementById('nr-lista-edif');
+  const filtrados = q
+    ? S.edificios.filter(e => nn(e.Nombre||'').includes(q) || nn(e['Dirección']||'').includes(q))
+    : S.edificios.slice(0, 20);
+
+  lista.innerHTML = filtrados.map(e => `
+    <div onclick="seleccionarEdificio('${(e.Nombre||'').replace(/'/g,"\\'")}','${(e['Dirección']||'').replace(/'/g,"\\'")}','${(e['Administración']||'').replace(/'/g,"\\'")}')"
+      style="padding:12px 14px;border-bottom:1px solid var(--borde);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--t)">${e.Nombre||'—'}</div>
+        <div style="font-size:12px;color:var(--t3);font-weight:600">${e['Dirección']||''}</div>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:var(--t3)">${e['Administración']||''}</div>
+    </div>`).join('');
+}
+
+function seleccionarEdificio(nombre, dir, admin) {
+  const edifObj = S.edificios.find(e => e.Nombre === nombre);
+  setEdificioRegistro(edifObj || { Nombre: nombre, 'Dirección': dir, 'Administración': admin });
+  document.getElementById('nr-buscador-edif').style.display = 'none';
+  document.getElementById('nr-input-edif').value = '';
+}
+
+/* ── Nota general ── */
+function toggleNotaGeneral() {
+  const body = document.getElementById('nr-nota-body');
+  body.style.display = body.style.display === 'none' ? 'flex' : 'none';
+}
+
+/* ── Jornadas previas del parcial ── */
+function renderJornadasPrevias(parcial) {
+  let jornadas = [];
+  try { jornadas = JSON.parse(parcial.Jornadas || '[]'); } catch(e) {}
+  const cont = document.getElementById('nr-jornadas-prev');
+  if (!cont) return;
+  if (jornadas.length === 0) { cont.innerHTML = '<div style="font-size:12px;color:var(--t3)">Sin jornadas previas</div>'; return; }
+  cont.innerHTML = jornadas.map((j,i) => `
+    <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px 12px">
+      <div style="font-size:11px;font-weight:800;color:var(--naranja);margin-bottom:4px">Jornada ${i+1} · ${j.fecha||'—'} · ${j.horaInicio||'—'} → ${j.horaFin||'—'}</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.4">${j.intervenciones||'Sin intervenciones'}</div>
+      ${j.obs ? `<div style="font-size:11px;color:var(--t3);font-style:italic;margin-top:4px">${j.obs}</div>` : ''}
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   INTERVENCIONES
+   ══════════════════════════════════════════════════ */
+function renderIntervenciones() {
+  const lista = document.getElementById('nr-lista-intervenciones');
+  if (!lista) return;
+  if (nr_intervenciones.length === 0) {
+    lista.innerHTML = `<div style="background:var(--s2);border:1px dashed var(--borde);border-radius:var(--rs);padding:16px;text-align:center;font-size:13px;color:var(--t3);font-weight:600">Sin intervenciones todavía. Tocá ＋ Agregar.</div>`;
+    return;
+  }
+  lista.innerHTML = nr_intervenciones.map((interv, i) => {
+    const compLabel = interv.componentes.map(c => `${c.qty}x ${c.nombre}`).join(', ') || '—';
+    return `
+      <div style="background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden">
+        <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-bottom:1px solid var(--borde)">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--am);letter-spacing:1px">INTERVENCIÓN ${i+1}</div>
+            <div style="font-size:13px;font-weight:800;color:var(--t);margin-top:1px">${interv.categoria} · ${interv.subcategoria}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div onclick="editarIntervencion(${i})" style="background:var(--s3);border:1px solid rgba(74,158,255,.3);border-radius:var(--rs);padding:5px 10px;font-size:11px;font-weight:800;color:var(--azul);cursor:pointer">Editar</div>
+            <div onclick="eliminarIntervencion(${i})" style="width:28px;height:28px;border-radius:50%;background:var(--rojo);border:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;cursor:pointer">✕</div>
+          </div>
+        </div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div style="background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.3);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--am)">${interv.evento}</div>
+            <div style="background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--verde)">${compLabel}</div>
+            ${interv.condicion ? `<div style="background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--rojo)">⚠️ ${interv.condicion}</div>` : ''}
+          </div>
+          ${interv.nota ? `<div style="font-size:12px;color:var(--t3);font-style:italic">📝 ${interv.nota}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function eliminarIntervencion(i) {
+  nr_intervenciones.splice(i, 1);
+  renderIntervenciones();
+}
+
+function editarIntervencion(i) {
+  int_editIdx = i;
+  const interv = nr_intervenciones[i];
+  int_catk = interv.catk || '';
+  int_categoria = interv.categoria || '';
+  int_subcategoria = interv.subcategoria || '';
+  int_evento = interv.evento || '';
+  int_componentes = [...(interv.componentes||[])];
+  int_modificadores = [...(interv.modificadores||[])];
+  int_condicion = interv.condicion || '';
+  int_nota = interv.nota || '';
+  abrirModalIntervencion();
+}
+
+function abrirNuevaIntervencion() {
+  int_editIdx = -1;
+  int_catk = ''; int_categoria = ''; int_subcategoria = '';
+  int_evento = ''; int_componentes = []; int_modificadores = [];
+  int_condicion = ''; int_nota = '';
+  abrirModalIntervencion();
+}
+
+function abrirModalIntervencion() {
+  const modal = document.getElementById('modal-intervencion');
+  modal.style.display = 'flex';
+  document.getElementById('int-edif-sub').textContent = S.regActual?.edificio || '—';
+  renderCategorias();
+  // Reset secciones
+  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('int-evento-val').textContent = '— Qué se hizo —';
+  document.getElementById('int-evento-list').style.display = 'none';
+  document.getElementById('int-comp-lista').innerHTML = '';
+  document.getElementById('int-modif-lista').innerHTML = '';
+  document.getElementById('int-cond-txt').textContent = '⚠️ Sin condición especial';
+  document.getElementById('int-cond-lista').style.display = 'none';
+  document.getElementById('int-nota-body').style.display = 'none';
+  document.getElementById('int-nota-txt').value = int_nota;
+
+  // Si es edición, restaurar selecciones
+  if (int_editIdx >= 0) {
+    renderSubcategorias(int_catk);
+    renderEventos(int_subcategoria);
+    document.getElementById('int-evento-val').textContent = int_evento;
+    renderComponentes();
+    renderModificadores();
+    if (int_condicion) {
+      document.getElementById('int-cond-txt').textContent = '⚠️ ' + int_condicion;
+    }
+    ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+      document.getElementById(id).style.display = 'block';
+    });
+  }
+  window.scrollTo(0,0);
+}
+
+function cerrarIntervencion() {
+  document.getElementById('modal-intervencion').style.display = 'none';
+}
+
+function guardarIntervencion() {
+  if (!int_categoria || !int_evento) {
+    toast('Completá categoría y evento', 'err');
+    return;
+  }
+  const interv = {
+    catk: int_catk,
+    categoria: int_categoria,
+    subcategoria: int_subcategoria,
+    evento: int_evento,
+    componentes: [...int_componentes],
+    modificadores: [...int_modificadores],
+    condicion: int_condicion,
+    nota: document.getElementById('int-nota-txt').value,
+  };
+  if (int_editIdx >= 0) {
+    nr_intervenciones[int_editIdx] = interv;
+  } else {
+    nr_intervenciones.push(interv);
+  }
+  cerrarIntervencion();
+  renderIntervenciones();
+  toast('Intervención guardada ✓', 'ok');
+}
+
+/* ── Categorías ── */
+function renderCategorias() {
+  const fila = document.getElementById('int-cat-fila');
+  // Obtener categorías únicas de Config_Categorias
+  const cats = {};
+  S.categorias.forEach(c => {
+    if (c.catk && !cats[c.catk]) cats[c.catk] = { catk:c.catk, emoji:c.emoji||'🔧', label:c.categoria||c.catk };
+  });
+  fila.innerHTML = Object.values(cats).map(c => `
+    <div onclick="elegirCategoria('${c.catk}','${(c.label).replace(/'/g,"\\'")}',this)"
+      class="int-cat-chip"
+      style="flex-shrink:0;background:var(--s1);border:2px solid var(--borde);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap${int_catk===c.catk?';border-color:var(--am);background:rgba(245,197,24,.08)':''}">
+      <span style="font-size:20px">${c.emoji}</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;color:${int_catk===c.catk?'var(--am)':'var(--t2)'}">${c.label}</span>
+    </div>`).join('');
+}
+
+function elegirCategoria(catk, label, el) {
+  int_catk = catk;
+  int_categoria = label;
+  int_subcategoria = '';
+  int_evento = '';
+  int_componentes = [];
+  int_modificadores = [];
+  // Estilo
+  document.querySelectorAll('.int-cat-chip').forEach(b => {
+    b.style.borderColor = 'var(--borde)';
+    b.style.background = 'var(--s1)';
+    b.querySelector('span:last-child').style.color = 'var(--t2)';
+  });
+  el.style.borderColor = 'var(--am)';
+  el.style.background = 'rgba(245,197,24,.08)';
+  el.querySelector('span:last-child').style.color = 'var(--am)';
+  renderSubcategorias(catk);
+}
+
+function renderSubcategorias(catk) {
+  const sec = document.getElementById('int-sec-sub');
+  sec.style.display = 'block';
+  // Flujo horizontal para energía y bombas
+  const tipoFlujo = ['en','bo'].includes(catk);
+  const wrap = document.getElementById('int-subcat-wrap');
+  const flujoWrap = document.getElementById('int-flujo-wrap');
+  const subcats = [...new Set(S.categorias.filter(c => c.catk === catk).map(c => c.subcategoria).filter(Boolean))];
+
+  if (tipoFlujo) {
+    wrap.style.display = 'none';
+    flujoWrap.style.display = 'flex';
+    const scroll = document.getElementById('int-flujo-scroll');
+    scroll.innerHTML = '';
+    subcats.forEach((s, idx) => {
+      if (idx > 0) {
+        const linea = document.createElement('div');
+        linea.style.cssText = 'width:20px;height:2px;background:var(--borde);flex-shrink:0;margin-bottom:18px';
+        scroll.appendChild(linea);
+      }
+      const nodo = document.createElement('div');
+      nodo.style.cssText = 'flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer';
+      nodo.innerHTML = `
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--s2);border:2px solid var(--borde);display:flex;align-items:center;justify-content:center;font-size:18px">⚡</div>
+        <div style="font-size:9px;font-weight:800;color:var(--t3);text-align:center;max-width:58px;line-height:1.2;text-transform:uppercase">${s}</div>`;
+      nodo.onclick = () => elegirSubcat(s);
+      scroll.appendChild(nodo);
+    });
+  } else {
+    wrap.style.display = 'flex';
+    flujoWrap.style.display = 'none';
+    wrap.innerHTML = subcats.map(s => `
+      <div onclick="elegirSubcat('${s.replace(/'/g,"\\'")}',this)"
+        style="background:var(--s2);border:1px solid ${int_subcategoria===s?'var(--am)':'var(--borde)'};border-radius:20px;padding:9px 16px;font-size:13px;font-weight:800;color:${int_subcategoria===s?'var(--am)':'var(--t3)'};cursor:pointer${int_subcategoria===s?';background:rgba(245,197,24,.08)':''}">
+        ${s}
+      </div>`).join('');
+  }
+  // Ocultar siguientes
+  ['int-sec-evento','int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+
+function elegirSubcat(subcat, el) {
+  int_subcategoria = subcat;
+  // Estilo chips
+  document.querySelectorAll('#int-subcat-wrap div').forEach(b => {
+    b.style.borderColor = 'var(--borde)';
+    b.style.color = 'var(--t3)';
+    b.style.background = 'var(--s2)';
+  });
+  if (el) {
+    el.style.borderColor = 'var(--am)';
+    el.style.color = 'var(--am)';
+    el.style.background = 'rgba(245,197,24,.08)';
+  }
+  renderEventos(subcat);
+}
+
+function renderEventos(subcat) {
+  const sec = document.getElementById('int-sec-evento');
+  sec.style.display = 'block';
+  const eventos = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === subcat).map(c => c.evento).filter(Boolean))];
+  const lista = document.getElementById('int-evento-list');
+  lista.innerHTML = eventos.map(ev => `
+    <div onclick="elegirEvento('${ev.replace(/'/g,"\\'")}',this)"
+      style="padding:13px 16px;border-bottom:1px solid var(--borde);font-size:14px;font-weight:700;color:${int_evento===ev?'var(--am)':'var(--t2)'};cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:${int_evento===ev?'rgba(245,197,24,.06)':''}">
+      ${ev}
+      <div style="width:18px;height:18px;border-radius:50%;border:2px solid ${int_evento===ev?'var(--am)':'var(--borde)'};background:${int_evento===ev?'var(--am)':'transparent'}"></div>
+    </div>`).join('');
+  ['int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+
+function toggleEventoDropdown() {
+  const lista = document.getElementById('int-evento-list');
+  lista.style.display = lista.style.display === 'none' ? 'block' : 'none';
+}
+
+function elegirEvento(ev) {
+  int_evento = ev;
+  document.getElementById('int-evento-val').textContent = ev;
+  document.getElementById('int-evento-val').style.color = 'var(--t2)';
+  document.getElementById('int-evento-list').style.display = 'none';
+  // Mostrar componentes
+  const comps = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === ev).map(c => c.componente).filter(Boolean))];
+  if (comps.length > 0 && int_componentes.length === 0) {
+    // Agregar primer componente automáticamente con cantidad 1
+    int_componentes = [{ nombre: comps[0], unidad: 'u', qty: 1, opciones: comps }];
+  }
+  renderComponentes();
+  renderModificadores();
+  ['int-sec-comp','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+    document.getElementById(id).style.display = 'block';
+  });
+}
+
+/* ── Componentes ── */
+function renderComponentes() {
+  const lista = document.getElementById('int-comp-lista');
+  if (!lista) return;
+  if (int_componentes.length === 0) {
+    lista.innerHTML = `<div style="font-size:12px;color:var(--t3);font-weight:600;padding:8px 0">Sin componentes. Tocá ＋ para agregar.</div>`;
+    return;
+  }
+  lista.innerHTML = int_componentes.map((c,i) => crearItemRow(c.nombre, c.qty, c.unidad||'u', i, 'comp')).join('');
+}
+
+function agregarComponenteModal() {
+  const comps = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === int_evento).map(c => c.componente).filter(Boolean))];
+  if (comps.length === 0) { toast('No hay componentes para esta combinación', 'err'); return; }
+  int_componentes.push({ nombre: comps[0], unidad: 'u', qty: 1, opciones: comps });
+  renderComponentes();
+}
+
+/* ── Modificadores ── */
+function renderModificadores() {
+  const lista = document.getElementById('int-modif-lista');
+  if (!lista) return;
+  lista.innerHTML = int_modificadores.map((m,i) => crearItemRow(m.nombre, m.qty, m.unidad||'u', i, 'modif')).join('');
+}
+
+function agregarModifModal() {
+  if (S.modificadores.length === 0) { toast('Sin modificadores disponibles', 'err'); return; }
+  const m = S.modificadores[0];
+  int_modificadores.push({ nombre: m.Nombre||m.nombre||'Modificador', unidad: m.Unidad||'u', qty: 1 });
+  renderModificadores();
+}
+
+/* ── Item row común (componente o modificador) ── */
+function crearItemRow(nombre, qty, unidad, idx, tipo) {
+  return `
+    <div style="display:flex;align-items:center;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:8px 12px;gap:8px">
+      <div style="font-size:15px;font-weight:800;color:#fff;flex:1">${nombre}</div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <div onclick="${tipo}CambiarQty(${idx},-1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--t2);cursor:pointer;user-select:none">←</div>
+        <div id="${tipo}-qty-${idx}" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--am);min-width:26px;text-align:center;cursor:ns-resize;user-select:none">${qty}</div>
+        <div style="font-size:12px;color:var(--t3);font-weight:800;min-width:14px">${unidad}</div>
+        <div onclick="${tipo}CambiarQty(${idx},1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--t2);cursor:pointer;user-select:none">→</div>
+      </div>
+      <div onclick="${tipo}Eliminar(${idx})" style="width:28px;height:28px;border-radius:50%;background:var(--rojo);border:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;cursor:pointer">✕</div>
+    </div>`;
+}
+
+function compCambiarQty(i, d) { int_componentes[i].qty = Math.max(1, int_componentes[i].qty + d); document.getElementById('comp-qty-'+i).textContent = int_componentes[i].qty; }
+function compEliminar(i) { int_componentes.splice(i,1); renderComponentes(); }
+function modifCambiarQty(i, d) { int_modificadores[i].qty = Math.max(1, int_modificadores[i].qty + d); document.getElementById('modif-qty-'+i).textContent = int_modificadores[i].qty; }
+function modifEliminar(i) { int_modificadores.splice(i,1); renderModificadores(); }
+
+/* ── Condición especial ── */
+function toggleCondicion() {
+  const lista = document.getElementById('int-cond-lista');
+  if (lista.style.display === 'none' || lista.style.display === '') {
+    lista.style.display = 'flex';
+    lista.style.flexDirection = 'column';
+    lista.style.gap = '6px';
+    lista.innerHTML = S.condiciones.map(c => `
+      <div onclick="elegirCondicion('${(c.nombre||c.clave||'').replace(/'/g,"\\'")}',this)"
+        style="background:var(--s2);border:1px solid ${int_condicion===(c.nombre||c.clave)?'var(--rojo)':'var(--borde)'};border-radius:var(--rs);padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700;color:${int_condicion===(c.nombre||c.clave)?'var(--rojo)':'var(--t2)'}">
+        ⚠️ ${c.nombre||c.clave} ${c.porcentaje?'+'+c.porcentaje+'%':''}
+      </div>`).join('');
+  } else {
+    lista.style.display = 'none';
+  }
+}
+
+function elegirCondicion(nombre, el) {
+  int_condicion = int_condicion === nombre ? '' : nombre;
+  document.getElementById('int-cond-txt').textContent = int_condicion ? '⚠️ ' + int_condicion : '⚠️ Sin condición especial';
+  document.getElementById('int-cond-txt').style.color = int_condicion ? 'var(--rojo)' : 'var(--t3)';
+  document.querySelectorAll('#int-cond-lista div').forEach(b => {
+    b.style.borderColor = 'var(--borde)'; b.style.color = 'var(--t2)';
+  });
+  if (int_condicion) { el.style.borderColor = 'var(--rojo)'; el.style.color = 'var(--rojo)'; }
+}
+
+function toggleNotaInterv() {
+  const body = document.getElementById('int-nota-body');
+  body.style.display = body.style.display === 'none' ? 'flex' : 'none';
+  body.style.flexDirection = 'column';
+}
+
+/* ══════════════════════════════════════════════════
+   MATERIALES DEL REGISTRO
+   ══════════════════════════════════════════════════ */
+function renderMaterialesRegistro() {
+  const lista = document.getElementById('nr-lista-materiales');
+  if (!lista) return;
+  if (nr_materiales.length === 0) {
+    lista.innerHTML = `<div style="background:var(--s2);border:1px dashed var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-size:13px;color:var(--t3);font-weight:600">Sin materiales todavía.</div>`;
+    return;
+  }
+  lista.innerHTML = nr_materiales.map((m,i) => `
+    <div style="display:flex;align-items:center;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:8px 12px;gap:8px">
+      <div style="font-size:15px;font-weight:800;color:#fff;flex:1">${m.nombre}</div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <div onclick="matCambiarQty(${i},-1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer">←</div>
+        <div id="mat-qty-${i}" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--am);min-width:26px;text-align:center">${m.cantidad}</div>
+        <div style="font-size:12px;color:var(--t3);font-weight:800">${m.unidad||'u'}</div>
+        <div onclick="matCambiarQty(${i},1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer">→</div>
+      </div>
+      <div onclick="matEliminar(${i})" style="width:28px;height:28px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;cursor:pointer">✕</div>
+    </div>`).join('');
+}
+
+function matCambiarQty(i,d) { nr_materiales[i].cantidad = Math.max(1, nr_materiales[i].cantidad+d); document.getElementById('mat-qty-'+i).textContent = nr_materiales[i].cantidad; }
+function matEliminar(i) { nr_materiales.splice(i,1); renderMaterialesRegistro(); }
+
+/* ── Modal materiales ── */
+function abrirBuscadorMateriales() {
+  nr_matSeleccionados = {};
+  document.getElementById('modal-materiales').style.display = 'flex';
+  document.getElementById('mat-input').value = '';
+  filtrarMateriales();
+}
+
+function cerrarBuscadorMateriales() {
+  document.getElementById('modal-materiales').style.display = 'none';
+}
+
+function filtrarMateriales() {
+  const q = nn(document.getElementById('mat-input').value);
+  const lista = document.getElementById('mat-lista-modal');
+  const filtrados = q
+    ? S.materiales.filter(m => nn(m.Nombre||'').includes(q))
+    : S.materiales;
+
+  lista.innerHTML = filtrados.map(m => {
+    const sel = !!nr_matSeleccionados[m.Nombre];
+    return `
+      <div onclick="toggleMatModal('${(m.Nombre||'').replace(/'/g,"\\'")}','${m.Unidad||'u'}')"
+        style="display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--borde);cursor:pointer">
+        <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${sel?'var(--am)':'var(--borde)'};background:${sel?'var(--am)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${sel?'✓':''}</div>
+        <div style="flex:1;font-size:15px;font-weight:700;color:${sel?'var(--am)':'var(--t2)'}">${m.Nombre||'—'}</div>
+        <div style="font-size:13px;font-weight:800;color:var(--t3)">${m.Unidad||'u'}</div>
+      </div>`;
+  }).join('');
+
+  const keys = Object.keys(nr_matSeleccionados);
+  const btn = document.getElementById('mat-btn-confirmar');
+  btn.style.opacity = keys.length > 0 ? '1' : '.3';
+  btn.style.pointerEvents = keys.length > 0 ? 'auto' : 'none';
+  btn.textContent = keys.length > 0 ? `Agregar ${keys.length} material${keys.length>1?'es':''} al registro` : 'Agregar al registro';
+}
+
+function toggleMatModal(nombre, unidad) {
+  if (nr_matSeleccionados[nombre]) delete nr_matSeleccionados[nombre];
+  else nr_matSeleccionados[nombre] = unidad;
+  filtrarMateriales();
+}
+
+function confirmarMateriales() {
+  Object.entries(nr_matSeleccionados).forEach(([nombre, unidad]) => {
+    const existe = nr_materiales.findIndex(m => m.nombre === nombre);
+    if (existe >= 0) nr_materiales[existe].cantidad++;
+    else nr_materiales.push({ nombre, unidad, cantidad: 1 });
+  });
+  cerrarBuscadorMateriales();
+  renderMaterialesRegistro();
+  toast('Materiales agregados ✓', 'ok');
+}
+
+function agregarMaterialLibre() {
+  const nombre = prompt('Nombre del material:');
+  if (!nombre) return;
+  const esMetros = confirm('¿Se mide en metros? (Cancelar = unidades)');
+  nr_materiales.push({ nombre, unidad: esMetros ? 'm' : 'u', cantidad: 1 });
+  renderMaterialesRegistro();
+}
+
+/* ══════════════════════════════════════════════════
+   CIERRE PARCIAL Y FINALIZAR
+   ══════════════════════════════════════════════════ */
+function construirTextoIntervenciones() {
+  return nr_intervenciones.map((interv, i) => {
+    const comps = interv.componentes.map(c => `${c.qty}x ${c.nombre}`).join(' + ');
+    const mods = interv.modificadores.map(m => `${m.nombre}: ${m.qty}${m.unidad}`).join(', ');
+    let txt = `${i+1}. ${interv.categoria} · ${interv.subcategoria} · ${interv.evento}`;
+    if (comps) txt += ` · ${comps}`;
+    if (mods) txt += ` · ${mods}`;
+    if (interv.condicion) txt += ` ⚠️ ${interv.condicion}`;
+    if (interv.nota) txt += ` · "${interv.nota}"`;
+    return txt;
+  }).join(' || ');
+}
+
+function construirMOData() {
+  return nr_intervenciones.map(interv => ({
+    catk: interv.catk,
+    sc: interv.subcategoria,
+    ev: interv.evento,
+    comp: interv.componentes.map(c => `${c.qty}x ${c.nombre}`).join(', '),
+    compItems: interv.componentes,
+    mods: interv.modificadores,
+    conds: interv.condicion ? [interv.condicion] : [],
+    tipoVisita: nr_tipoVisita,
+  }));
+}
+
+async function cierreParcial() {
+  if (!S.regActual?.edificio) { toast('Elegí un edificio primero', 'err'); return; }
+
+  const jornada = {
+    fecha: nr_fecha,
+    horaInicio: nr_horaInicio,
+    horaFin: nr_horaFin,
+    intervenciones: construirTextoIntervenciones(),
+    mo_data: JSON.stringify(construirMOData()),
+    obs: document.getElementById('nr-nota-texto').value,
+  };
+
+  let jornadas = [];
+  const idParcial = S.regActual.idParcial || ('PARC-' + Date.now());
+  if (S.regActual.dataParcial) {
+    try { jornadas = JSON.parse(S.regActual.dataParcial.Jornadas || '[]'); } catch(e) {}
+  }
+  jornadas.push(jornada);
+
+  const data = {
+    ID_Parcial: idParcial,
+    Edificio: S.regActual.edificio,
+    Cuit: S.regActual.edifObj?.CUIT || '',
+    Tipo: nr_tipoVisita,
+    Estado: 'Parcial',
+    Jornadas: JSON.stringify(jornadas),
+    Ultima_Actualizacion: new Date().toISOString(),
+  };
+
+  toast('Guardando cierre parcial...', '');
+  try {
+    await asPost({ action: 'upsert', sheet: 'Registros_Parciales', key: 'ID_Parcial', keyval: idParcial, data });
+    // Actualizar estado local
+    const idx = S.parciales.findIndex(p => p.ID_Parcial === idParcial);
+    if (idx >= 0) S.parciales[idx] = data;
+    else S.parciales.push(data);
+    renderParciales();
+    toast('Cierre parcial guardado ✓', 'ok');
+    S.regActual = null;
+    ir('pantalla-dashboard');
+  } catch(e) {
+    toast('Error al guardar. Reintentá.', 'err');
+  }
+}
+
+async function finalizarRegistro() {
+  if (!S.regActual?.edificio) { toast('Elegí un edificio primero', 'err'); return; }
+  if (!nr_fecha) { toast('Ingresá la fecha', 'err'); return; }
+  if (!nr_tipoVisita) { toast('Elegí el tipo de visita', 'err'); return; }
+  if (nr_intervenciones.length === 0) { toast('Agregá al menos una intervención', 'err'); return; }
+
+  const codigo = 'REG-' + new Date().getFullYear() + '-' + Math.floor(Math.random()*9000+1000);
+  const materiales = nr_materiales.map(m => ({ nombre: m.nombre, qty: m.cantidad }));
+
+  const reg = {
+    Codigo: codigo,
+    Fecha: nr_fecha,
+    Hora: nr_horaInicio,
+    'Hora Fin': nr_horaFin,
+    Edificio: S.regActual.edificio,
+    'Tipo de Visita': nr_tipoVisita,
+    Intervenciones: construirTextoIntervenciones(),
+    Observaciones: document.getElementById('nr-nota-texto').value,
+    Estado: 'Pendiente',
+    Timestamp: new Date().toISOString(),
+    MO_Data: JSON.stringify(construirMOData()),
+    'Materiales Extra': JSON.stringify(materiales),
+  };
+
+  toast('Enviando registro...', '');
+  try {
+    await asPost({ sheet: 'Registros', data: reg });
+    // Si era parcial, eliminar de parciales
+    if (S.regActual.idParcial) {
+      await asPost({ _method: 'DELETE', sheet: 'Registros_Parciales', _key: 'ID_Parcial', _val: S.regActual.idParcial });
+      S.parciales = S.parciales.filter(p => p.ID_Parcial !== S.regActual.idParcial);
+      renderParciales();
+    }
+    S.registros.push(reg);
+    renderDashboard();
+    toast('Registro enviado ✓', 'ok');
+    S.regActual = null;
+    ir('pantalla-dashboard');
+  } catch(e) {
+    toast('Error al enviar. Reintentá.', 'err');
+  }
 }
 
 /* ══════════════════════════════════════════════════
