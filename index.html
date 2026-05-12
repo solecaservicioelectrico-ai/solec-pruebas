@@ -545,7 +545,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.11</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.12</div>
     </div>
   </div>
 
@@ -1030,6 +1030,94 @@ body {
     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">Categoría</div>
     <div id="int-cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
 
+    <!-- FLUJO ESPECIAL BOMBAS -->
+    <div id="int-sec-bombas" style="display:none">
+      <div style="height:1px;background:var(--borde);margin:4px 0"></div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--azul);margin-bottom:10px">💧 Datos de Bombas</div>
+
+      <!-- ¿Cuál estaba funcionando al llegar? -->
+      <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--r);padding:14px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">● Bomba al llegar — ¿cuál funcionaba?</div>
+        <div style="display:flex;gap:8px">
+          <div id="bo-b1" onclick="elegirBombaLlegar(1)" style="flex:1;background:var(--s3);border:2px solid var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--t3);cursor:pointer">Bomba 1</div>
+          <div id="bo-b2" onclick="elegirBombaLlegar(2)" style="flex:1;background:var(--s3);border:2px solid var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--t3);cursor:pointer">Bomba 2</div>
+        </div>
+
+        <!-- ¿Qué pasa? -->
+        <div id="bo-sec-quepasa" style="display:none;margin-top:10px">
+          <div style="font-size:13px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">¿Qué pasa con esa bomba?</div>
+          <div style="display:flex;gap:8px">
+            <div id="bo-rota" onclick="elegirAccionBomba('rota')" style="flex:1;background:var(--s3);border:2px solid var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-size:14px;font-weight:800;color:var(--t3);cursor:pointer">🔄 Se Rota</div>
+            <div id="bo-continua" onclick="elegirAccionBomba('continua')" style="flex:1;background:var(--s3);border:2px solid var(--borde);border-radius:var(--rs);padding:12px;text-align:center;font-size:14px;font-weight:800;color:var(--t3);cursor:pointer">✅ Continúa</div>
+          </div>
+        </div>
+
+        <!-- Mediciones bomba activa -->
+        <div id="bo-sec-mediciones" style="display:none;margin-top:10px">
+          <div style="font-size:12px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Amperaje bomba activa (A)</div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--t3);font-weight:700;margin-bottom:4px">FASE R</div>
+              <input id="bo-fr1" type="number" step="0.1" placeholder="ej: 4.2" style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:16px;color:#fff;text-align:center;outline:none">
+            </div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--t3);font-weight:700;margin-bottom:4px">FASE S</div>
+              <input id="bo-fs1" type="number" step="0.1" placeholder="ej: 4.2" style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:16px;color:#fff;text-align:center;outline:none">
+            </div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--t3);font-weight:700;margin-bottom:4px">FASE T</div>
+              <input id="bo-ft1" type="number" step="0.1" placeholder="ej: 4.2" style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:16px;color:#fff;text-align:center;outline:none">
+            </div>
+          </div>
+          <textarea id="bo-obs1" placeholder="Observaciones: ruido, recalentamiento, no arranca..." rows="2"
+            style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:14px;color:#fff;font-family:'Barlow',sans-serif;outline:none;resize:none"></textarea>
+        </div>
+      </div>
+
+      <!-- Bomba 2 — la que queda funcionando (solo si se rota) -->
+      <div id="bo-sec-b2" style="display:none;background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.3);border-radius:var(--r);padding:14px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:800;color:var(--verde);margin-bottom:10px">● <span id="bo-b2-label">Bomba 2</span> — la que queda funcionando</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--t3);font-weight:700;margin-bottom:4px">FASE R</div>
+            <input id="bo-fr2" type="number" step="0.1" placeholder="ej: 4.0" style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:16px;color:#fff;text-align:center;outline:none">
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--t3);font-weight:700;margin-bottom:4px">FASE S</div>
+            <input id="bo-fs2" type="number" step="0.1" placeholder="ej: 4.0" style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:16px;color:#fff;text-align:center;outline:none">
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--t3);font-weight:700;margin-bottom:4px">FASE T</div>
+            <input id="bo-ft2" type="number" step="0.1" placeholder="ej: 4.0" style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:16px;color:#fff;text-align:center;outline:none">
+          </div>
+        </div>
+        <textarea id="bo-obs2" placeholder="Observaciones de la bomba que queda funcionando..." rows="2"
+          style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:14px;color:#fff;font-family:'Barlow',sans-serif;outline:none;resize:none"></textarea>
+      </div>
+
+      <!-- Observaciones generales -->
+      <div>
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:6px">Observaciones generales</div>
+        <textarea id="bo-obs-gen" placeholder="Baja tensión, falta de fase, válvula de retención, ruidos, nivel de cisterna..." rows="3"
+          style="width:100%;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px;font-size:14px;color:#fff;font-family:'Barlow',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
+      </div>
+
+      <!-- Tablero -->
+      <div style="margin-top:10px">
+        <div onclick="toggleTableroBombas()" style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:18px">⬛</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:var(--lila)">Tablero</span>
+          </div>
+          <span style="font-size:16px;color:var(--t3)" id="bo-tablero-arrow">▶</span>
+        </div>
+        <div id="bo-sec-tablero" style="display:none;margin-top:6px;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px">
+          <textarea id="bo-tablero-obs" placeholder="Estado del tablero de bombas, disyuntores, guardamotor..." rows="3"
+            style="width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:10px;font-size:14px;color:#fff;font-family:'Barlow',sans-serif;outline:none;resize:none"></textarea>
+        </div>
+      </div>
+    </div>
+
     <!-- SUBCATEGORÍA -->
     <div id="int-sec-sub" style="display:none">
       <div style="height:1px;background:var(--borde);margin:4px 0"></div>
@@ -1364,7 +1452,6 @@ function renderGraficoHoras(dias) {
   const wrap = document.getElementById('chart-horas');
   wrap.innerHTML = '';
 
-  // Agrupar registros por día
   const hoy = new Date();
   const diasData = [];
 
@@ -1374,45 +1461,41 @@ function renderGraficoHoras(dias) {
     const dStr = d.toISOString().split('T')[0];
     const regsDelDia = S.registros.filter(r => r.Fecha && String(r.Fecha).startsWith(dStr));
 
-    let minInicio = null, maxFin = null, minsProd = 0, minsUrg = 0;
+    let minsProd = 0, minsUrg = 0;
+    let primerInicio = null, ultimoFin = null;
 
     regsDelDia.forEach(r => {
-      const hi = r.Hora ? String(r.Hora) : null;
-      const hf = r['Hora Fin'] ? String(r['Hora Fin']) : null;
-      if (hi) {
-        const [hh,mm] = hi.split(':').map(Number);
-        const mins = hh*60+mm;
-        if (minInicio === null || mins < minInicio) minInicio = mins;
-      }
-      if (hf) {
-        const [hh,mm] = hf.split(':').map(Number);
-        const mins = hh*60+mm;
-        if (maxFin === null || mins > maxFin) maxFin = mins;
-        if (hi) {
-          const hiMins = (() => { const [h,m]=String(r.Hora).split(':').map(Number); return h*60+m; })();
-          const dur = mins - hiMins;
-          if (dur > 0) {
-            if (String(r['Tipo de Visita']).toLowerCase().includes('urgencia')) minsUrg += dur;
-            else minsProd += dur;
-          }
+      const hi = r.Hora ? String(r.Hora).trim() : null;
+      const hf = r['Hora Fin'] ? String(r['Hora Fin']).trim() : null;
+      if (!hi || !hi.includes(':')) return;
+      const [hh, mm] = hi.split(':').map(Number);
+      const inicioMins = hh*60 + mm;
+      if (primerInicio === null || inicioMins < primerInicio) primerInicio = inicioMins;
+      if (hf && hf.includes(':')) {
+        const [hf2, mf2] = hf.split(':').map(Number);
+        const finMins = hf2*60 + mf2;
+        if (ultimoFin === null || finMins > ultimoFin) ultimoFin = finMins;
+        const dur = finMins - inicioMins;
+        if (dur > 0) {
+          if (String(r['Tipo de Visita']||'').toLowerCase().includes('urgencia')) minsUrg += dur;
+          else minsProd += dur;
         }
       }
     });
 
-    const minsOp = (minInicio !== null && maxFin !== null) ? maxFin - minInicio : 0;
-    const JORNADA = 540; // 9 horas en minutos
+    const minsOp = (primerInicio !== null && ultimoFin !== null) ? ultimoFin - primerInicio : (minsProd + minsUrg);
+    const JORNADA = 540;
     const minsExt = Math.max(0, minsOp - JORNADA);
 
-    diasData.push({ fecha: d, dStr, minsOp, minsProd, minsExt, minsUrg });
+    diasData.push({ fecha: d, dStr, minsOp, minsProd, minsExt, minsUrg, regsN: regsDelDia.length });
   }
 
-  // Máximo para escalar
-  const maxMins = Math.max(...diasData.map(d => Math.max(d.minsOp, 600)), 600);
+  const maxMins = Math.max(...diasData.map(d => d.minsOp || 0), 480);
 
   diasData.forEach((d, i) => {
     const esHoy = i === diasData.length - 1;
     const nombre = esHoy ? 'Hoy' : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.fecha.getDay()];
-    const h = (v) => Math.round((v / maxMins) * 78);
+    const h = (v) => v > 0 ? Math.max(3, Math.round((v / maxMins) * 78)) : 0;
 
     const grp = document.createElement('div');
     grp.className = 'bar-group';
@@ -1430,16 +1513,21 @@ function renderGraficoHoras(dias) {
 
   // Resumen hoy
   const hoyData = diasData[diasData.length - 1];
-  const fmt = m => m > 0 ? `${Math.floor(m/60)}h ${m%60}m` : '0h';
-  const hoyReg = S.registros.filter(r => r.Fecha && String(r.Fecha).startsWith(hoyData.dStr));
-  const urgHoy = hoyReg.filter(r => String(r['Tipo de Visita']).toLowerCase().includes('urgencia')).length;
+  const fmt = m => {
+    if (!m || m <= 0) return '0h';
+    const h = Math.floor(m/60);
+    const min = m%60;
+    return h > 0 ? `${h}h${min>0?' '+min+'m':''}` : `${min}m`;
+  };
   const resDiv = document.getElementById('horas-resumen-hoy');
-  resDiv.innerHTML = `
-    <div class="hh-item op"><div class="hh-num">${fmt(hoyData.minsOp)}</div><div class="hh-lbl">Operativas</div></div>
-    <div class="hh-item ef"><div class="hh-num">${fmt(hoyData.minsProd)}</div><div class="hh-lbl">Efectivas</div></div>
-    <div class="hh-item ext"><div class="hh-num">${fmt(hoyData.minsExt)}</div><div class="hh-lbl">Extra</div></div>
-    <div class="hh-item urg"><div class="hh-num">${urgHoy}</div><div class="hh-lbl">Urgencias</div></div>
-  `;
+  if (resDiv) {
+    resDiv.innerHTML = `
+      <div class="hh-item op"><div class="hh-num">${fmt(hoyData.minsOp)}</div><div class="hh-lbl">Operativas</div></div>
+      <div class="hh-item ef"><div class="hh-num">${fmt(hoyData.minsProd)}</div><div class="hh-lbl">Efectivas</div></div>
+      <div class="hh-item ext"><div class="hh-num">${fmt(hoyData.minsExt)}</div><div class="hh-lbl">Extra</div></div>
+      <div class="hh-item urg"><div class="hh-num">${hoyData.minsUrg > 0 ? '1' : '0'}</div><div class="hh-lbl">Urgencias</div></div>
+    `;
+  }
 }
 
 /* ══════════════════════════════════════════════════
@@ -1751,7 +1839,9 @@ function guardarIntervencion() {
     componentes: [...int_componentes],
     modificadores: [...int_modificadores],
     condicion: int_condicion,
+    ubicacion: document.getElementById('int-ubic-txt')?.value || '',
     nota: document.getElementById('int-nota-txt').value,
+    bombas: int_catk === 'bo' ? obtenerDatosBombas() : null,
   };
   if (int_editIdx >= 0) {
     nr_intervenciones[int_editIdx] = interv;
@@ -1893,12 +1983,23 @@ function elegirSubcat(subcat, el) {
   document.getElementById('int-evento-list').style.display = 'none';
 
   // Ocultar secciones downstream
-  ['int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+  ['int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota','int-sec-bombas'].forEach(id => {
     const sec = document.getElementById(id);
     if (sec) sec.style.display = 'none';
   });
 
   renderEventos(subcat);
+
+  // Si es categoría Bombas, mostrar flujo especial
+  if (int_catk === 'bo') {
+    mostrarFlujoBombas();
+    document.getElementById('int-sec-bombas').style.display = 'block';
+    // Para bombas, también mostrar secciones comunes después
+    ['int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+      const sec = document.getElementById(id);
+      if (sec) sec.style.display = 'block';
+    });
+  }
 }
 
 function renderEventos(subcat) {
@@ -1927,11 +2028,8 @@ function elegirEvento(ev) {
   document.getElementById('int-evento-val').textContent = ev;
   document.getElementById('int-evento-val').style.color = '#fff';
   document.getElementById('int-evento-list').style.display = 'none';
-  // Mostrar componentes
-  const comps = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === ev).map(c => c.componente).filter(Boolean))];
-  if (comps.length > 0 && int_componentes.length === 0) {
-    int_componentes = [{ nombre: comps[0], unidad: 'u', qty: 1, opciones: comps }];
-  }
+  // Mostrar componentes — no autoagregar, dejar que el usuario elija
+  int_componentes = [];
   renderComponentes();
   renderModificadores();
   ['int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
@@ -1981,7 +2079,34 @@ function renderComponentes() {
 function agregarComponenteModal() {
   const comps = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === int_evento).map(c => c.componente).filter(Boolean))];
   if (comps.length === 0) { toast('No hay componentes para esta combinación', 'err'); return; }
-  int_componentes.push({ nombre: comps[0], unidad: 'u', qty: 1, opciones: comps });
+  
+  // Si hay un solo componente, agregarlo directo
+  if (comps.length === 1) {
+    int_componentes.push({ nombre: comps[0], unidad: 'u', qty: 1 });
+    renderComponentes();
+    return;
+  }
+
+  // Si hay varios, mostrar lista para elegir
+  const lista = document.getElementById('int-comp-lista');
+  // Agregar picker al final
+  const pickerId = 'comp-picker-' + Date.now();
+  const picker = document.createElement('div');
+  picker.id = pickerId;
+  picker.style.cssText = 'background:var(--s1);border:1px solid var(--am);border-radius:var(--rs);overflow:hidden;margin-top:4px';
+  picker.innerHTML = comps.map(c => `
+    <div onclick="seleccionarComponente('${c.replace(/'/g,"\\'")}','${pickerId}')"
+      style="padding:13px 16px;border-bottom:1px solid var(--borde);font-size:16px;font-weight:700;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+      ${c}
+      <span style="font-size:20px;color:var(--am)">＋</span>
+    </div>`).join('');
+  lista.appendChild(picker);
+}
+
+function seleccionarComponente(nombre, pickerId) {
+  int_componentes.push({ nombre, unidad: 'u', qty: 1 });
+  const picker = document.getElementById(pickerId);
+  if (picker) picker.remove();
   renderComponentes();
 }
 
@@ -2363,6 +2488,82 @@ function continuarParcial(idParcial, edificio, tipo) {
   };
   document.getElementById('nr-edif-sub').textContent = edificio;
   ir('pantalla-nuevo-registro');
+}
+
+/* ══════════════════════════════════════════════════
+   FLUJO ESPECIAL BOMBAS
+   ══════════════════════════════════════════════════ */
+var bo_bombaLlegar = 0; // 1 o 2
+var bo_accion = ''; // 'rota' o 'continua'
+
+function mostrarFlujoBombas() {
+  bo_bombaLlegar = 0;
+  bo_accion = '';
+  document.getElementById('int-sec-bombas').style.display = 'block';
+  document.getElementById('bo-sec-quepasa').style.display = 'none';
+  document.getElementById('bo-sec-mediciones').style.display = 'none';
+  document.getElementById('bo-sec-b2').style.display = 'none';
+  ['bo-b1','bo-b2','bo-rota','bo-continua'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.borderColor = 'var(--borde)'; el.style.color = 'var(--t3)'; el.style.background = 'var(--s3)'; }
+  });
+}
+
+function elegirBombaLlegar(n) {
+  bo_bombaLlegar = n;
+  ['bo-b1','bo-b2'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    if (i+1 === n) { el.style.borderColor = 'var(--azul)'; el.style.color = 'var(--azul)'; el.style.background = 'rgba(74,158,255,.1)'; }
+    else { el.style.borderColor = 'var(--borde)'; el.style.color = 'var(--t3)'; el.style.background = 'var(--s3)'; }
+  });
+  document.getElementById('bo-sec-quepasa').style.display = 'block';
+}
+
+function elegirAccionBomba(accion) {
+  bo_accion = accion;
+  const esRota = accion === 'rota';
+  const rotaEl = document.getElementById('bo-rota');
+  const contEl = document.getElementById('bo-continua');
+  rotaEl.style.borderColor = esRota ? 'var(--verde)' : 'var(--borde)';
+  rotaEl.style.color = esRota ? 'var(--verde)' : 'var(--t3)';
+  rotaEl.style.background = esRota ? 'rgba(0,200,150,.1)' : 'var(--s3)';
+  contEl.style.borderColor = !esRota ? 'var(--azul)' : 'var(--borde)';
+  contEl.style.color = !esRota ? 'var(--azul)' : 'var(--t3)';
+  contEl.style.background = !esRota ? 'rgba(74,158,255,.1)' : 'var(--s3)';
+  document.getElementById('bo-sec-mediciones').style.display = 'block';
+  // Si se rota, mostrar la segunda bomba
+  if (esRota) {
+    const b2label = bo_bombaLlegar === 1 ? 'Bomba 2' : 'Bomba 1';
+    document.getElementById('bo-b2-label').textContent = b2label;
+    document.getElementById('bo-sec-b2').style.display = 'block';
+  } else {
+    document.getElementById('bo-sec-b2').style.display = 'none';
+  }
+}
+
+function toggleTableroBombas() {
+  const sec = document.getElementById('bo-sec-tablero');
+  const arrow = document.getElementById('bo-tablero-arrow');
+  const isOpen = sec.style.display !== 'none';
+  sec.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▶' : '▼';
+}
+
+function obtenerDatosBombas() {
+  return {
+    bombaLlegar: bo_bombaLlegar,
+    accion: bo_accion,
+    frB1: document.getElementById('bo-fr1')?.value || '',
+    fsB1: document.getElementById('bo-fs1')?.value || '',
+    ftB1: document.getElementById('bo-ft1')?.value || '',
+    obsB1: document.getElementById('bo-obs1')?.value || '',
+    frB2: document.getElementById('bo-fr2')?.value || '',
+    fsB2: document.getElementById('bo-fs2')?.value || '',
+    ftB2: document.getElementById('bo-ft2')?.value || '',
+    obsB2: document.getElementById('bo-obs2')?.value || '',
+    obsGen: document.getElementById('bo-obs-gen')?.value || '',
+    tablero: document.getElementById('bo-tablero-obs')?.value || '',
+  };
 }
 
 /* ══════════════════════════════════════════════════
