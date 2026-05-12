@@ -45,6 +45,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.qty-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;display:flex;align-items:flex-end;justify-content:center;}
+.qty-modal{background:var(--s1);border-radius:18px 18px 0 0;padding:24px 20px 0;width:100%;max-width:430px;max-height:80vh;display:flex;flex-direction:column;}
+.qty-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--am);margin-bottom:8px;}
+.qty-lista{overflow-y:auto;flex:1;margin-bottom:8px;}
+.qty-ok{width:100%;background:var(--am);border:none;border-radius:var(--rs);padding:16px;color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;margin-top:10px;}
+.qty-cancel{width:100%;background:none;border:none;color:var(--t3);font-size:15px;font-weight:700;margin-top:8px;margin-bottom:20px;cursor:pointer;padding:8px;}
+.qty-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--borde);cursor:pointer;}
+.qty-chk{width:36px;height:36px;border-radius:10px;border:2px solid var(--t3);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qty-chk.on{border-color:var(--am);background:var(--am);}
+.qty-nom{flex:1;font-size:17px;font-weight:700;color:var(--t);}
+
 /* ══════════════════════════════════════════════════
    PANTALLAS — sistema de navegación
    ══════════════════════════════════════════════════ */
@@ -545,7 +556,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.12</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.13</div>
     </div>
   </div>
 
@@ -1150,14 +1161,14 @@ body {
       <div id="int-comp-lista" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
-    <!-- UBICACIÓN — campo libre -->
+    <!-- UBICACIÓN — modal con buscador como v3.68 -->
     <div id="int-sec-ubic" style="display:none">
       <div style="height:1px;background:var(--borde);margin:4px 0"></div>
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:8px">📍 Ubicación</div>
-      <div style="background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:center;gap:8px">
-        <input id="int-ubic-txt" type="text" placeholder="Ej: Piso 4 · pasillo, Cochera subsuelo, Hall PB..."
-          style="flex:1;background:none;border:none;outline:none;font-size:15px;font-family:'Barlow',sans-serif;font-weight:600;color:#fff">
-        <div onclick="dictarUbicacion()" style="font-size:18px;cursor:pointer;color:var(--azul)">🎙️</div>
+      <div id="int-ubic-btn" onclick="abrirModalUbicacion()"
+        style="background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div id="int-ubic-display" style="font-size:16px;font-weight:700;color:var(--t3)">— Sin ubicación —</div>
+        <div style="font-size:13px;color:var(--azul);font-weight:700">Elegir</div>
       </div>
     </div>
 
@@ -1550,6 +1561,7 @@ var int_subcategoria = '';
 var int_evento = '';
 var int_componentes = [];
 var int_modificadores = [];
+var int_ubicaciones = [];
 var int_condicion = '';
 var int_nota = '';
 var int_editIdx = -1; // -1 = nueva
@@ -1780,7 +1792,7 @@ function abrirModalIntervencion() {
   document.getElementById('int-edif-sub').textContent = S.regActual?.edificio || '—';
   renderCategorias();
   // Reset secciones
-  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota','int-sec-bombas'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -1795,8 +1807,9 @@ function abrirModalIntervencion() {
   document.getElementById('int-cond-txt').style.color = 'var(--t3)';
   document.getElementById('int-cond-lista').style.display = 'none';
   document.getElementById('int-nota-txt').value = int_nota;
-  const ubicInput = document.getElementById('int-ubic-txt');
-  if (ubicInput) ubicInput.value = '';
+  int_ubicaciones = [];
+  const display = document.getElementById('int-ubic-display');
+  if (display) { display.textContent = '— Sin ubicación —'; display.style.color = 'var(--t3)'; }
 
   // Si es edición, restaurar selecciones
   if (int_editIdx >= 0) {
@@ -1810,7 +1823,7 @@ function abrirModalIntervencion() {
       document.getElementById('int-cond-txt').textContent = '⚠️ ' + int_condicion;
       document.getElementById('int-cond-txt').style.color = 'var(--rojo)';
     }
-    ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+    ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota','int-sec-bombas'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'block';
     });
@@ -1818,7 +1831,18 @@ function abrirModalIntervencion() {
   window.scrollTo(0,0);
 }
 
-function dictarUbicacion() { toast('Dictado de ubicación — próximamente 🎙️', ''); }
+function abrirModalUbicacion() {
+  const ubicItems = S.ubicaciones.map(u => u.Nombre || u.nombre || String(u)).filter(Boolean);
+  const presel = int_ubicaciones ? int_ubicaciones.reduce((acc, u) => { acc[u] = true; return acc; }, {}) : {};
+  abrirModalSelector('UBICACIÓN', ubicItems, presel, (elegidos) => {
+    int_ubicaciones = elegidos;
+    const display = document.getElementById('int-ubic-display');
+    if (display) {
+      display.textContent = elegidos.length > 0 ? elegidos.join(', ') : '— Sin ubicación —';
+      display.style.color = elegidos.length > 0 ? '#fff' : 'var(--t3)';
+    }
+  }, { buscador: true, placeholder: 'Buscar ubicación...', libre: true });
+}
 function dictarNotaInterv() { toast('Dictado de nota — próximamente 🎙️', ''); }
 function dictarNota() { toast('Dictado de nota — próximamente 🎙️', ''); }
 
@@ -1839,7 +1863,7 @@ function guardarIntervencion() {
     componentes: [...int_componentes],
     modificadores: [...int_modificadores],
     condicion: int_condicion,
-    ubicacion: document.getElementById('int-ubic-txt')?.value || '',
+    ubicaciones: [...int_ubicaciones],
     nota: document.getElementById('int-nota-txt').value,
     bombas: int_catk === 'bo' ? obtenerDatosBombas() : null,
   };
@@ -1901,7 +1925,7 @@ function elegirCategoria(catk, label, el) {
   if (lbl) lbl.style.color = 'var(--am)';
 
   // Ocultar todas las secciones downstream
-  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota'].forEach(id => {
+  ['int-sec-sub','int-sec-evento','int-sec-comp','int-sec-ubic','int-sec-modif','int-sec-cond','int-sec-nota','int-sec-bombas'].forEach(id => {
     const sec = document.getElementById(id);
     if (sec) sec.style.display = 'none';
   });
@@ -2041,28 +2065,21 @@ function elegirEvento(ev) {
 }
 
 function abrirListaModif() {
-  const dropdown = document.getElementById('int-modif-dropdown');
-  if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-    dropdown.style.display = 'block';
-    dropdown.innerHTML = S.modificadores.map(m => {
-      const nombre = m.Nombre || m.nombre || 'Modificador';
-      const unidad = m.Unidad || m.unidad || 'u';
-      return `
-        <div onclick="seleccionarModif('${nombre.replace(/'/g,"\\'")}','${unidad}')"
-          style="padding:13px 16px;border-bottom:1px solid var(--borde);font-size:15px;font-weight:700;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
-          ${nombre}
-          <span style="font-size:12px;color:var(--t3);font-weight:800">${unidad}</span>
-        </div>`;
-    }).join('');
-  } else {
-    dropdown.style.display = 'none';
-  }
-}
-
-function seleccionarModif(nombre, unidad) {
-  int_modificadores.push({ nombre, unidad, qty: 1 });
-  renderModificadores();
-  document.getElementById('int-modif-dropdown').style.display = 'none';
+  if (S.modificadores.length === 0) { toast('Sin modificadores disponibles', 'err'); return; }
+  abrirModalSelector('MODIFICADORES', S.modificadores, {}, (elegidos) => {
+    elegidos.forEach(nombre => {
+      const modObj = S.modificadores.find(m => (m.Nombre || m.nombre) === nombre);
+      if (!int_modificadores.find(x => x.nombre === nombre)) {
+        int_modificadores.push({
+          nombre,
+          unidad: modObj ? (modObj.Unidad || modObj.unidad || 'u') : 'u',
+          qty: 1
+        });
+      }
+    });
+    renderModificadores();
+    document.getElementById('int-modif-dropdown').style.display = 'none';
+  });
 }
 
 /* ── Componentes ── */
@@ -2077,37 +2094,18 @@ function renderComponentes() {
 }
 
 function agregarComponenteModal() {
-  const comps = [...new Set(S.categorias.filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === int_evento).map(c => c.componente).filter(Boolean))];
+  const comps = [...new Set(S.categorias
+    .filter(c => c.catk === int_catk && c.subcategoria === int_subcategoria && c.evento === int_evento)
+    .map(c => c.componente).filter(Boolean))];
   if (comps.length === 0) { toast('No hay componentes para esta combinación', 'err'); return; }
-  
-  // Si hay un solo componente, agregarlo directo
-  if (comps.length === 1) {
-    int_componentes.push({ nombre: comps[0], unidad: 'u', qty: 1 });
+  abrirModalSelector('COMPONENTES', comps, {}, (elegidos) => {
+    elegidos.forEach(c => {
+      if (!int_componentes.find(x => x.nombre === c)) {
+        int_componentes.push({ nombre: c, unidad: 'u', qty: 1 });
+      }
+    });
     renderComponentes();
-    return;
-  }
-
-  // Si hay varios, mostrar lista para elegir
-  const lista = document.getElementById('int-comp-lista');
-  // Agregar picker al final
-  const pickerId = 'comp-picker-' + Date.now();
-  const picker = document.createElement('div');
-  picker.id = pickerId;
-  picker.style.cssText = 'background:var(--s1);border:1px solid var(--am);border-radius:var(--rs);overflow:hidden;margin-top:4px';
-  picker.innerHTML = comps.map(c => `
-    <div onclick="seleccionarComponente('${c.replace(/'/g,"\\'")}','${pickerId}')"
-      style="padding:13px 16px;border-bottom:1px solid var(--borde);font-size:16px;font-weight:700;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
-      ${c}
-      <span style="font-size:20px;color:var(--am)">＋</span>
-    </div>`).join('');
-  lista.appendChild(picker);
-}
-
-function seleccionarComponente(nombre, pickerId) {
-  int_componentes.push({ nombre, unidad: 'u', qty: 1 });
-  const picker = document.getElementById(pickerId);
-  if (picker) picker.remove();
-  renderComponentes();
+  });
 }
 
 /* ── Modificadores ── */
@@ -2488,6 +2486,104 @@ function continuarParcial(idParcial, edificio, tipo) {
   };
   document.getElementById('nr-edif-sub').textContent = edificio;
   ir('pantalla-nuevo-registro');
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL SELECTOR — bottom-sheet genérico (igual v3.68)
+   ══════════════════════════════════════════════════ */
+function abrirModalSelector(titulo, items, presel, onConfirm, opts) {
+  opts = opts || {};
+  const ov = document.createElement('div'); ov.className = 'qty-overlay';
+  const modal = document.createElement('div'); modal.className = 'qty-modal';
+
+  const tit = document.createElement('div'); tit.className = 'qty-title';
+  tit.textContent = titulo;
+  modal.appendChild(tit);
+
+  // Buscador (opcional)
+  let sinp = null;
+  if (opts.buscador) {
+    sinp = document.createElement('input'); sinp.type = 'text';
+    sinp.placeholder = opts.placeholder || 'Buscar...';
+    sinp.style.cssText = 'width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:8px;padding:10px 14px;color:#fff;font-size:15px;font-weight:600;outline:none;margin:8px 0;box-sizing:border-box;';
+    modal.appendChild(sinp);
+  }
+
+  const listaDiv = document.createElement('div'); listaDiv.className = 'qty-lista';
+  modal.appendChild(listaDiv);
+
+  const sel = {};
+  Object.keys(presel || {}).forEach(k => { sel[k] = true; });
+
+  function renderLista() {
+    const q = sinp ? sinp.value.toLowerCase().trim() : '';
+    const filtrados = q ? items.filter(it => {
+      const nombre = typeof it === 'string' ? it : (it.Nombre || it.nombre || '');
+      return nombre.toLowerCase().includes(q);
+    }) : items;
+    listaDiv.innerHTML = '';
+    filtrados.forEach(it => {
+      const nombre = typeof it === 'string' ? it : (it.Nombre || it.nombre || '');
+      const unidad = typeof it === 'string' ? '' : (it.Unidad || it.unidad || '');
+      const row = document.createElement('div'); row.className = 'qty-row';
+      const chk = document.createElement('div'); chk.className = 'qty-chk' + (sel[nombre] ? ' on' : '');
+      chk.innerHTML = sel[nombre] ? '<span style="color:#000;font-size:20px;font-weight:900">✓</span>' : '';
+      const nom = document.createElement('span'); nom.className = 'qty-nom'; nom.textContent = nombre;
+      row.appendChild(chk); row.appendChild(nom);
+      if (unidad) {
+        const uni = document.createElement('span');
+        uni.style.cssText = 'font-size:13px;font-weight:800;color:var(--t3);flex-shrink:0';
+        uni.textContent = unidad;
+        row.appendChild(uni);
+      }
+      row.addEventListener('click', () => {
+        if (opts.single) { Object.keys(sel).forEach(k => delete sel[k]); }
+        sel[nombre] = !sel[nombre];
+        chk.className = 'qty-chk' + (sel[nombre] ? ' on' : '');
+        chk.innerHTML = sel[nombre] ? '<span style="color:#000;font-size:20px;font-weight:900">✓</span>' : '';
+        if (opts.single && sel[nombre]) {
+          document.body.removeChild(ov);
+          onConfirm([nombre], it);
+        }
+      });
+      listaDiv.appendChild(row);
+    });
+    // Opción libre si hay texto
+    if (sinp && sinp.value.trim() && opts.libre) {
+      const rowLib = document.createElement('div');
+      rowLib.style.cssText = 'padding:12px 0;cursor:pointer;color:var(--am);font-weight:700;font-size:14px;border-top:1px dashed var(--borde);margin-top:4px;';
+      rowLib.textContent = '+ Agregar "' + sinp.value.trim() + '" como libre';
+      rowLib.addEventListener('click', () => {
+        const val = sinp.value.trim();
+        sel[val] = true;
+        items.push(val);
+        sinp.value = '';
+        renderLista();
+      });
+      listaDiv.appendChild(rowLib);
+    }
+  }
+  if (sinp) sinp.addEventListener('input', renderLista);
+  renderLista();
+
+  if (!opts.single) {
+    const btnOk = document.createElement('button'); btnOk.className = 'qty-ok';
+    btnOk.textContent = 'LISTO';
+    btnOk.addEventListener('click', () => {
+      document.body.removeChild(ov);
+      onConfirm(Object.keys(sel).filter(k => sel[k]));
+    });
+    modal.appendChild(btnOk);
+  }
+
+  const btnCan = document.createElement('button'); btnCan.className = 'qty-cancel';
+  btnCan.textContent = 'Cancelar';
+  btnCan.addEventListener('click', () => document.body.removeChild(ov));
+  modal.appendChild(btnCan);
+
+  ov.appendChild(modal);
+  ov.addEventListener('click', e => { if (e.target === ov) document.body.removeChild(ov); });
+  document.body.appendChild(ov);
 }
 
 /* ══════════════════════════════════════════════════
