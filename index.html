@@ -66,6 +66,22 @@ body {
 }
 .pantalla.activa { display: flex; }
 
+.drum-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10002;display:flex;align-items:flex-end;justify-content:center;}
+.drum-modal{background:var(--s1);border-radius:22px 22px 0 0;padding:24px 20px 40px;width:100%;max-width:430px;}
+.drum-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--am);margin-bottom:2px;}
+.drum-sub{font-size:14px;color:var(--t2);font-weight:600;margin-bottom:16px;}
+.drum-wrap{position:relative;height:200px;overflow:hidden;border-radius:14px;background:var(--s2);border:1px solid var(--borde);margin-bottom:20px;user-select:none;touch-action:none;cursor:grab;}
+.drum-wrap:active{cursor:grabbing;}
+.drum-list{position:absolute;width:100%;will-change:transform;}
+.drum-item{height:50px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--t3);letter-spacing:1px;}
+.drum-item.sel{color:var(--am);font-size:46px;letter-spacing:2px;}
+.drum-item.near{color:var(--t2);font-size:34px;}
+.drum-fade-top{position:absolute;top:0;left:0;right:0;height:75px;background:linear-gradient(to bottom,var(--s2) 20%,transparent);pointer-events:none;z-index:1;}
+.drum-fade-bot{position:absolute;bottom:0;left:0;right:0;height:75px;background:linear-gradient(to top,var(--s2) 20%,transparent);pointer-events:none;z-index:1;}
+.drum-line{position:absolute;top:75px;left:12px;right:12px;height:50px;border-top:2px solid rgba(245,197,24,.4);border-bottom:2px solid rgba(245,197,24,.4);border-radius:8px;background:rgba(245,197,24,.05);pointer-events:none;z-index:2;}
+.drum-ok{width:100%;background:var(--am);border:none;border-radius:var(--rs);padding:17px;color:#000;font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;cursor:pointer;}
+.drum-cancel{width:100%;background:none;border:none;color:var(--t3);font-size:15px;font-weight:700;margin-top:12px;cursor:pointer;padding:8px;}
+
 /* ══════════════════════════════════════════════════
    LOADING GLOBAL
    ══════════════════════════════════════════════════ */
@@ -556,7 +572,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.13</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.14</div>
     </div>
   </div>
 
@@ -986,15 +1002,15 @@ body {
   </div><!-- /scroll-body -->
 
   <!-- FAB INFORME TÉCNICO -->
-  <div class="fab" style="bottom:90px;right:16px;background:var(--azul);box-shadow:0 4px 20px rgba(74,158,255,.4)" onclick="toast('Informe técnico — próximamente','ok')">
+  <div class="fab" style="bottom:100px;right:16px;background:var(--azul);box-shadow:0 4px 20px rgba(74,158,255,.4)" onclick="toast('Informe técnico — próximamente','ok')">
     <span style="font-size:16px">📋</span>
     <span class="fab-label">Informe Técnico</span>
   </div>
 
   <!-- BOTTOM BAR -->
-  <div class="bottom-bar">
-    <div class="btn-naranja" onclick="cierreParcial()">💾 Parcial</div>
-    <div class="btn-am" onclick="finalizarRegistro()">✓ Finalizar</div>
+  <div class="bottom-bar" style="padding-right:16px">
+    <div class="btn-naranja" onclick="cierreParcial()" style="flex:0 0 auto;padding:16px 20px">💾 Parcial</div>
+    <div class="btn-am" onclick="finalizarRegistro()" style="flex:1">✓ Finalizar</div>
   </div>
 
 </div>
@@ -1808,6 +1824,7 @@ function abrirModalIntervencion() {
   document.getElementById('int-cond-lista').style.display = 'none';
   document.getElementById('int-nota-txt').value = int_nota;
   int_ubicaciones = [];
+  window._condSel = {};
   const display = document.getElementById('int-ubic-display');
   if (display) { display.textContent = '— Sin ubicación —'; display.style.color = 'var(--t3)'; }
 
@@ -2127,47 +2144,75 @@ function crearItemRow(nombre, qty, unidad, idx, tipo) {
   return `
     <div style="display:flex;align-items:center;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px 12px;gap:8px">
       <div style="font-size:17px;font-weight:800;color:#fff;flex:1;line-height:1.3">${nombre}</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <div onclick="${tipo}CambiarQty(${idx},-1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--t2);cursor:pointer;user-select:none">←</div>
-        <div id="${tipo}-qty-${idx}" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--am);min-width:30px;text-align:center;cursor:ns-resize;user-select:none;line-height:1">${qty}</div>
-        <div style="font-size:13px;color:var(--t3);font-weight:800;min-width:16px">${unidad}</div>
-        <div onclick="${tipo}CambiarQty(${idx},1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--t2);cursor:pointer;user-select:none">→</div>
+      <div onclick="${tipo}AbrirRueda(${idx})" style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs)">
+        <span id="${tipo}-qty-${idx}" style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--am);line-height:1">${qty}</span>
+        <span style="font-size:13px;color:var(--t3);font-weight:800">${unidad}</span>
       </div>
-      <div onclick="${tipo}Eliminar(${idx})" style="width:30px;height:30px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;cursor:pointer">✕</div>
+      <div onclick="${tipo}Eliminar(${idx})" style="width:34px;height:34px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;cursor:pointer;flex-shrink:0">✕</div>
     </div>`;
 }
 
 function compCambiarQty(i, d) { int_componentes[i].qty = Math.max(1, int_componentes[i].qty + d); document.getElementById('comp-qty-'+i).textContent = int_componentes[i].qty; }
 function compEliminar(i) { int_componentes.splice(i,1); renderComponentes(); }
+function compAbrirRueda(i) {
+  abrirRuedaCantidad(int_componentes[i].nombre, int_componentes[i].unidad||'u', function(v){
+    int_componentes[i].qty = v;
+    const el = document.getElementById('comp-qty-'+i);
+    if(el) el.textContent = v;
+  }, int_componentes[i].qty);
+}
 function modifCambiarQty(i, d) { int_modificadores[i].qty = Math.max(1, int_modificadores[i].qty + d); document.getElementById('modif-qty-'+i).textContent = int_modificadores[i].qty; }
 function modifEliminar(i) { int_modificadores.splice(i,1); renderModificadores(); }
+function modifAbrirRueda(i) {
+  abrirRuedaCantidad(int_modificadores[i].nombre, int_modificadores[i].unidad||'u', function(v){
+    int_modificadores[i].qty = v;
+    const el = document.getElementById('modif-qty-'+i);
+    if(el) el.textContent = v;
+  }, int_modificadores[i].qty);
+}
 
 /* ── Condición especial ── */
 function toggleCondicion() {
   const lista = document.getElementById('int-cond-lista');
-  if (lista.style.display === 'none' || lista.style.display === '') {
-    lista.style.display = 'flex';
-    lista.style.flexDirection = 'column';
-    lista.style.gap = '6px';
-    lista.innerHTML = S.condiciones.map(c => `
-      <div onclick="elegirCondicion('${(c.nombre||c.clave||'').replace(/'/g,"\\'")}',this)"
-        style="background:var(--s2);border:1px solid ${int_condicion===(c.nombre||c.clave)?'var(--rojo)':'var(--borde)'};border-radius:var(--rs);padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700;color:${int_condicion===(c.nombre||c.clave)?'var(--rojo)':'var(--t2)'}">
-        ⚠️ ${c.nombre||c.clave} ${c.porcentaje?'+'+c.porcentaje+'%':''}
-      </div>`).join('');
-  } else {
-    lista.style.display = 'none';
-  }
+  const isOpen = lista.style.display === 'flex';
+  if (isOpen) { lista.style.display = 'none'; return; }
+  if (!window._condSel) window._condSel = {};
+  lista.style.display = 'flex';
+  lista.style.flexDirection = 'column';
+  lista.style.gap = '6px';
+  renderCondLista();
 }
 
-function elegirCondicion(nombre, el) {
-  int_condicion = int_condicion === nombre ? '' : nombre;
-  document.getElementById('int-cond-txt').textContent = int_condicion ? '⚠️ ' + int_condicion : '⚠️ Sin condición especial';
-  document.getElementById('int-cond-txt').style.color = int_condicion ? 'var(--rojo)' : 'var(--t3)';
-  document.querySelectorAll('#int-cond-lista div').forEach(b => {
-    b.style.borderColor = 'var(--borde)'; b.style.color = 'var(--t2)';
-  });
-  if (int_condicion) { el.style.borderColor = 'var(--rojo)'; el.style.color = 'var(--rojo)'; }
+function renderCondLista() {
+  const lista = document.getElementById('int-cond-lista');
+  if (!lista || lista.style.display === 'none') return;
+  if (!window._condSel) window._condSel = {};
+  lista.innerHTML = S.condiciones.map(c => {
+    const nombre = c.nombre || c.clave || c.Nombre || '';
+    const porc = c.porcentaje || c.Porcentaje || '';
+    const sel = !!window._condSel[nombre];
+    return `<div onclick="toggleCondItem('${nombre.replace(/'/g,"\\'")}' )"
+      style="background:var(--s2);border:2px solid ${sel?'var(--rojo)':'var(--borde)'};border-radius:var(--rs);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+      <div style="width:22px;height:22px;border-radius:6px;border:2px solid ${sel?'var(--rojo)':'var(--borde)'};background:${sel?'var(--rojo)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${sel?'<span style="color:#fff;font-size:13px;font-weight:900">✓</span>':''}</div>
+      <div style="flex:1;font-size:15px;font-weight:700;color:${sel?'var(--rojo)':'var(--t2)'}">⚠️ ${nombre}</div>
+      ${porc?'<div style="font-size:12px;font-weight:800;color:var(--naranja)">+'+porc+'%</div>':''}
+    </div>`;
+  }).join('');
+  const any = Object.values(window._condSel).some(Boolean);
+  if (any) lista.innerHTML += '<div onclick="limpiarCondiciones()" style="text-align:center;font-size:13px;font-weight:800;color:var(--t3);cursor:pointer;padding:8px;border-top:1px dashed var(--borde);margin-top:4px">✕ Quitar condiciones</div>';
+  const sel = Object.keys(window._condSel).filter(k => window._condSel[k]);
+  const txt = document.getElementById('int-cond-txt');
+  if (txt) { txt.textContent = sel.length > 0 ? '⚠️ ' + sel.join(' + ') : '⚠️ Sin condición especial'; txt.style.color = sel.length > 0 ? 'var(--rojo)' : 'var(--t3)'; }
+  int_condicion = sel.join(', ');
 }
+
+function toggleCondItem(nombre) {
+  if (!window._condSel) window._condSel = {};
+  window._condSel[nombre] = !window._condSel[nombre];
+  renderCondLista();
+}
+
+function limpiarCondiciones() { window._condSel = {}; int_condicion = ''; renderCondLista(); }
 
 function toggleNotaInterv() {
   const body = document.getElementById('int-nota-body');
@@ -2186,19 +2231,24 @@ function renderMaterialesRegistro() {
     return;
   }
   lista.innerHTML = nr_materiales.map((m,i) => `
-    <div style="display:flex;align-items:center;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:8px 12px;gap:8px">
-      <div style="font-size:15px;font-weight:800;color:#fff;flex:1">${m.nombre}</div>
-      <div style="display:flex;align-items:center;gap:5px">
-        <div onclick="matCambiarQty(${i},-1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer">←</div>
-        <div id="mat-qty-${i}" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--am);min-width:30px;text-align:center">${m.cantidad}</div>
-        <div style="font-size:12px;color:var(--t3);font-weight:800">${m.unidad||'u'}</div>
-        <div onclick="matCambiarQty(${i},1)" style="background:var(--s3);border:1px solid var(--borde);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer">→</div>
+    <div style="display:flex;align-items:center;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:10px 12px;gap:8px">
+      <div style="font-size:17px;font-weight:800;color:#fff;flex:1;line-height:1.3">${m.nombre}</div>
+      <div onclick="matAbrirRueda(${i})" style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs)">
+        <span id="mat-qty-${i}" style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--am);line-height:1">${m.cantidad}</span>
+        <span style="font-size:13px;color:var(--t3);font-weight:800">${m.unidad||'u'}</span>
       </div>
-      <div onclick="matEliminar(${i})" style="width:28px;height:28px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;cursor:pointer">✕</div>
+      <div onclick="matEliminar(${i})" style="width:34px;height:34px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;cursor:pointer;flex-shrink:0">✕</div>
     </div>`).join('');
 }
 
 function matCambiarQty(i,d) { nr_materiales[i].cantidad = Math.max(1, nr_materiales[i].cantidad+d); document.getElementById('mat-qty-'+i).textContent = nr_materiales[i].cantidad; }
+function matAbrirRueda(i) {
+  abrirRuedaCantidad(nr_materiales[i].nombre, nr_materiales[i].unidad||'u', function(v){
+    nr_materiales[i].cantidad = v;
+    const el = document.getElementById('mat-qty-'+i);
+    if(el) el.textContent = v;
+  }, nr_materiales[i].cantidad);
+}
 function matEliminar(i) { nr_materiales.splice(i,1); renderMaterialesRegistro(); }
 
 /* ── Modal materiales ── */
@@ -2486,6 +2536,91 @@ function continuarParcial(idParcial, edificio, tipo) {
   };
   document.getElementById('nr-edif-sub').textContent = edificio;
   ir('pantalla-nuevo-registro');
+}
+
+/* ══════════════════════════════════════════════════
+   RUEDA DESLIZABLE — copiada exacta del v3.68
+   ══════════════════════════════════════════════════ */
+function abrirRueda(titulo, sub, items, defIdx, cb){
+  defIdx = Math.max(0, Math.min(defIdx||0, items.length-1));
+  var ITEM_H = 50;
+  var PAD = 2;
+  var selIdx = defIdx;
+  var ov = document.createElement('div'); ov.className = 'drum-overlay';
+  ov.innerHTML =
+    '<div class="drum-modal">' +
+      '<div class="drum-title">' + titulo + '</div>' +
+      '<div class="drum-sub">' + sub + '</div>' +
+      '<div class="drum-wrap" id="_dw">' +
+        '<div class="drum-list" id="_dl"></div>' +
+        '<div class="drum-fade-top"></div>' +
+        '<div class="drum-fade-bot"></div>' +
+        '<div class="drum-line"></div>' +
+      '</div>' +
+      '<button class="drum-ok">✅ CONFIRMAR</button>' +
+      '<button class="drum-cancel">Cancelar</button>' +
+    '</div>';
+  document.body.appendChild(ov);
+  var dl = ov.querySelector('#_dl');
+  var dw = ov.querySelector('#_dw');
+  for(var p=0;p<PAD;p++){var ph=document.createElement('div');ph.className='drum-item';dl.appendChild(ph);}
+  items.forEach(function(v){var d=document.createElement('div');d.className='drum-item';d.textContent=v;dl.appendChild(d);});
+  for(var p=0;p<PAD;p++){var ph=document.createElement('div');ph.className='drum-item';dl.appendChild(ph);}
+  function idxToY(idx){return 75-(idx+PAD)*ITEM_H;}
+  function yToIdx(y){return Math.round((75-y)/ITEM_H-PAD);}
+  var curY=idxToY(selIdx),velY=0,lastY=0,lastT=0,isDragging=false,rafId=null;
+  function clampIdx(i){return Math.max(0,Math.min(items.length-1,i));}
+  function clampY(y){return Math.max(idxToY(items.length-1),Math.min(idxToY(0),y));}
+  function setY(y,animate){
+    curY=y;
+    dl.style.transition=animate?'transform .25s cubic-bezier(.17,.67,.35,1)':'none';
+    dl.style.transform='translateY('+y+'px)';
+    var ni=clampIdx(yToIdx(y));
+    if(ni!==selIdx){selIdx=ni;updateSel();}
+  }
+  function snapToIdx(idx){selIdx=clampIdx(idx);setY(idxToY(selIdx),true);updateSel();}
+  function updateSel(){
+    dl.querySelectorAll('.drum-item').forEach(function(el,i){
+      var di=i-PAD;el.classList.remove('sel','near');
+      if(di===selIdx)el.classList.add('sel');
+      else if(Math.abs(di-selIdx)===1)el.classList.add('near');
+    });
+  }
+  setY(curY,false);updateSel();
+  function getClientY(e){return e.touches?e.touches[0].clientY:e.clientY;}
+  dw.addEventListener('touchstart',function(e){if(rafId){cancelAnimationFrame(rafId);rafId=null;}isDragging=true;lastY=getClientY(e);lastT=Date.now();velY=0;dl.style.transition='none';},{passive:true});
+  dw.addEventListener('mousedown',function(e){if(rafId){cancelAnimationFrame(rafId);rafId=null;}isDragging=true;lastY=getClientY(e);lastT=Date.now();velY=0;dl.style.transition='none';e.preventDefault();});
+  function onMove(e){
+    if(!isDragging)return;
+    var y=getClientY(e),dy=y-lastY,dt=Date.now()-lastT;
+    if(dt>0)velY=dy/dt*16;lastY=y;lastT=Date.now();
+    curY=clampY(curY+dy);dl.style.transform='translateY('+curY+'px)';
+    var ni=clampIdx(yToIdx(curY));if(ni!==selIdx){selIdx=ni;updateSel();}
+  }
+  function onEnd(){
+    if(!isDragging)return;isDragging=false;
+    function inertia(){
+      if(Math.abs(velY)<0.3){snapToIdx(clampIdx(yToIdx(curY)));return;}
+      curY=clampY(curY+velY);velY*=0.88;dl.style.transition='none';
+      dl.style.transform='translateY('+curY+'px)';
+      var ni=clampIdx(yToIdx(curY));if(ni!==selIdx){selIdx=ni;updateSel();}
+      rafId=requestAnimationFrame(inertia);
+    }
+    rafId=requestAnimationFrame(inertia);
+  }
+  dw.addEventListener('touchmove',function(e){onMove(e);e.preventDefault();},{passive:false});
+  dw.addEventListener('touchend',onEnd);
+  document.addEventListener('mousemove',function(e){if(isDragging)onMove(e);});
+  document.addEventListener('mouseup',function(){if(isDragging)onEnd();});
+  ov.querySelector('.drum-ok').addEventListener('click',function(){document.body.removeChild(ov);cb(items[selIdx],selIdx);});
+  ov.querySelector('.drum-cancel').addEventListener('click',function(){document.body.removeChild(ov);});
+}
+
+function abrirRuedaCantidad(nom, un, cb, valorInicial){
+  var items=[];
+  for(var i=1;i<=200;i++) items.push(i+' '+un);
+  var startIdx=(valorInicial&&valorInicial>0)?valorInicial-1:0;
+  abrirRueda('CANTIDAD', nom, items, startIdx, function(v,idx){cb(idx+1);});
 }
 
 /* ══════════════════════════════════════════════════
