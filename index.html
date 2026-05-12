@@ -545,7 +545,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.9</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.10</div>
     </div>
   </div>
 
@@ -1795,15 +1795,18 @@ function elegirCategoria(catk, label, el) {
   int_evento = '';
   int_componentes = [];
   int_modificadores = [];
-  // Estilo
+  // Reset estilos todos los chips
   document.querySelectorAll('.int-cat-chip').forEach(b => {
     b.style.borderColor = 'var(--borde)';
     b.style.background = 'var(--s1)';
-    b.querySelector('span:last-child').style.color = 'var(--t2)';
+    const lbl = b.querySelector('div:last-child');
+    if (lbl) lbl.style.color = 'var(--t2)';
   });
+  // Activar el seleccionado
   el.style.borderColor = 'var(--am)';
   el.style.background = 'rgba(245,197,24,.08)';
-  el.querySelector('span:last-child').style.color = 'var(--am)';
+  const lbl = el.querySelector('div:last-child');
+  if (lbl) lbl.style.color = 'var(--am)';
   renderSubcategorias(catk);
 }
 
