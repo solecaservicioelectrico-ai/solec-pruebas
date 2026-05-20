@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.17</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.19</div>
     </div>
   </div>
 
@@ -1501,12 +1501,20 @@ function renderGraficoHoras(dias) {
   const hoy = new Date();
   const diasData = [];
 
+  // Fecha local en Argentina (offset manual si hace falta)
+  function fechaLocal(d) {
+    var y = d.getFullYear();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var day = String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+
   for (let i = dias-1; i >= 0; i--) {
     const d = new Date(hoy);
     d.setDate(d.getDate() - i);
-    const dStr = d.toISOString().split('T')[0];
+    const dStr = fechaLocal(d);
     const regsDelDia = S.registros.filter(r => {
-      var f = String(r.Fecha || '').replace(' ','T').split('T')[0];
+      var f = String(r.Fecha || '').replace(' ','T').split('T')[0].trim();
       return f === dStr && r.Hora;
     });
 
@@ -1555,7 +1563,11 @@ function renderGraficoHoras(dias) {
     wrap.appendChild(grp);
   });
 
-  const hoyData = diasData[diasData.length - 1];
+  // Mostrar resumen del último día con actividad, no forzar hoy
+  var hoyData = diasData[diasData.length - 1];
+  for (var di = diasData.length - 1; di >= 0; di--) {
+    if (diasData[di].minsOp > 0) { hoyData = diasData[di]; break; }
+  }
   const fmt = m => {
     if (!m || m <= 0) return '0h';
     const h = Math.floor(m/60);
