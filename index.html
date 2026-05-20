@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.15</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.16</div>
     </div>
   </div>
 
@@ -1484,6 +1484,20 @@ function renderGraficoHoras(dias) {
   const wrap = document.getElementById('chart-horas');
   wrap.innerHTML = '';
 
+  function parsearHora(val) {
+    if (!val) return null;
+    var s = String(val).trim();
+    if (s.includes(':')) {
+      var parts = s.split(':');
+      var h = parseInt(parts[0]) || 0;
+      var m = parseInt(parts[1]) || 0;
+      if (h >= 0 && h < 24) return h*60 + m;
+    }
+    var n = parseFloat(s);
+    if (!isNaN(n) && n > 0 && n < 1) return Math.round(n * 24 * 60);
+    return null;
+  }
+
   const hoy = new Date();
   const diasData = [];
 
@@ -1491,21 +1505,20 @@ function renderGraficoHoras(dias) {
     const d = new Date(hoy);
     d.setDate(d.getDate() - i);
     const dStr = d.toISOString().split('T')[0];
-    const regsDelDia = S.registros.filter(r => r.Fecha && String(r.Fecha).startsWith(dStr));
+    const regsDelDia = S.registros.filter(r => {
+      var f = String(r.Fecha || '').split('T')[0];
+      return f === dStr && r.Hora;
+    });
 
     let minsProd = 0, minsUrg = 0;
     let primerInicio = null, ultimoFin = null;
 
     regsDelDia.forEach(r => {
-      const hi = r.Hora ? String(r.Hora).trim() : null;
-      const hf = r['Hora Fin'] ? String(r['Hora Fin']).trim() : null;
-      if (!hi || !hi.includes(':')) return;
-      const [hh, mm] = hi.split(':').map(Number);
-      const inicioMins = hh*60 + mm;
+      const inicioMins = parsearHora(r.Hora);
+      const finMins = parsearHora(r['Hora Fin'] || r.HoraFin);
+      if (inicioMins === null) return;
       if (primerInicio === null || inicioMins < primerInicio) primerInicio = inicioMins;
-      if (hf && hf.includes(':')) {
-        const [hf2, mf2] = hf.split(':').map(Number);
-        const finMins = hf2*60 + mf2;
+      if (finMins !== null) {
         if (ultimoFin === null || finMins > ultimoFin) ultimoFin = finMins;
         const dur = finMins - inicioMins;
         if (dur > 0) {
@@ -1515,10 +1528,11 @@ function renderGraficoHoras(dias) {
       }
     });
 
-    const minsOp = (primerInicio !== null && ultimoFin !== null) ? ultimoFin - primerInicio : (minsProd + minsUrg);
+    const minsOp = (primerInicio !== null && ultimoFin !== null)
+      ? ultimoFin - primerInicio
+      : minsProd + minsUrg;
     const JORNADA = 540;
     const minsExt = Math.max(0, minsOp - JORNADA);
-
     diasData.push({ fecha: d, dStr, minsOp, minsProd, minsExt, minsUrg, regsN: regsDelDia.length });
   }
 
@@ -1528,40 +1542,35 @@ function renderGraficoHoras(dias) {
     const esHoy = i === diasData.length - 1;
     const nombre = esHoy ? 'Hoy' : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.fecha.getDay()];
     const h = (v) => v > 0 ? Math.max(3, Math.round((v / maxMins) * 78)) : 0;
-
     const grp = document.createElement('div');
     grp.className = 'bar-group';
-    grp.innerHTML = `
-      <div class="bars">
-        <div class="bar op"  style="height:${h(d.minsOp)}px"></div>
-        <div class="bar ef"  style="height:${h(d.minsProd)}px"></div>
-        <div class="bar ext" style="height:${h(d.minsExt)}px"></div>
-        <div class="bar urg" style="height:${h(d.minsUrg)}px"></div>
-      </div>
-      <div class="bar-day ${esHoy?'hoy':''}">${nombre}</div>
-    `;
+    grp.innerHTML =
+      '<div class="bars">' +
+        '<div class="bar op"  style="height:'+h(d.minsOp)+'px"></div>' +
+        '<div class="bar ef"  style="height:'+h(d.minsProd)+'px"></div>' +
+        '<div class="bar ext" style="height:'+h(d.minsExt)+'px"></div>' +
+        '<div class="bar urg" style="height:'+h(d.minsUrg)+'px"></div>' +
+      '</div>' +
+      '<div class="bar-day '+(esHoy?'hoy':'')+'">'+ nombre+'</div>';
     wrap.appendChild(grp);
   });
 
-  // Resumen hoy
   const hoyData = diasData[diasData.length - 1];
   const fmt = m => {
     if (!m || m <= 0) return '0h';
     const h = Math.floor(m/60);
     const min = m%60;
-    return h > 0 ? `${h}h${min>0?' '+min+'m':''}` : `${min}m`;
+    return h > 0 ? h+'h'+(min>0?' '+min+'m':'') : min+'m';
   };
   const resDiv = document.getElementById('horas-resumen-hoy');
   if (resDiv) {
-    resDiv.innerHTML = `
-      <div class="hh-item op"><div class="hh-num">${fmt(hoyData.minsOp)}</div><div class="hh-lbl">Operativas</div></div>
-      <div class="hh-item ef"><div class="hh-num">${fmt(hoyData.minsProd)}</div><div class="hh-lbl">Efectivas</div></div>
-      <div class="hh-item ext"><div class="hh-num">${fmt(hoyData.minsExt)}</div><div class="hh-lbl">Extra</div></div>
-      <div class="hh-item urg"><div class="hh-num">${hoyData.minsUrg > 0 ? '1' : '0'}</div><div class="hh-lbl">Urgencias</div></div>
-    `;
+    resDiv.innerHTML =
+      '<div class="hh-item op"><div class="hh-num">'+fmt(hoyData.minsOp)+'</div><div class="hh-lbl">Operativas</div></div>' +
+      '<div class="hh-item ef"><div class="hh-num">'+fmt(hoyData.minsProd)+'</div><div class="hh-lbl">Efectivas</div></div>' +
+      '<div class="hh-item ext"><div class="hh-num">'+fmt(hoyData.minsExt)+'</div><div class="hh-lbl">Extra</div></div>' +
+      '<div class="hh-item urg"><div class="hh-num">'+(hoyData.minsUrg>0?'1':'0')+'</div><div class="hh-lbl">Urgencias</div></div>';
   }
 }
-
 /* ══════════════════════════════════════════════════
    NUEVO REGISTRO — estado y lógica
    ══════════════════════════════════════════════════ */
