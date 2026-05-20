@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.20</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.21</div>
     </div>
   </div>
 
@@ -1579,11 +1579,13 @@ function renderGraficoHoras(dias) {
     wrap.appendChild(grp);
   });
 
-  // Mostrar resumen del último día con actividad, no forzar hoy
-  var hoyData = diasData[diasData.length - 1];
-  for (var di = diasData.length - 1; di >= 0; di--) {
-    if (diasData[di].minsOp > 0) { hoyData = diasData[di]; break; }
-  }
+  // Resumen TOTAL del período seleccionado
+  const totalOp   = diasData.reduce((s,d) => s + d.minsOp,   0);
+  const totalProd = diasData.reduce((s,d) => s + d.minsProd, 0);
+  const totalExt  = diasData.reduce((s,d) => s + d.minsExt,  0);
+  const totalUrg  = diasData.reduce((s,d) => s + d.minsUrg,  0);
+  const diasTrab  = diasData.filter(d => d.minsOp > 0).length;
+
   const fmt = m => {
     if (!m || m <= 0) return '0h';
     const h = Math.floor(m/60);
@@ -1593,10 +1595,10 @@ function renderGraficoHoras(dias) {
   const resDiv = document.getElementById('horas-resumen-hoy');
   if (resDiv) {
     resDiv.innerHTML =
-      '<div class="hh-item op"><div class="hh-num">'+fmt(hoyData.minsOp)+'</div><div class="hh-lbl">Operativas</div></div>' +
-      '<div class="hh-item ef"><div class="hh-num">'+fmt(hoyData.minsProd)+'</div><div class="hh-lbl">Efectivas</div></div>' +
-      '<div class="hh-item ext"><div class="hh-num">'+fmt(hoyData.minsExt)+'</div><div class="hh-lbl">Extra</div></div>' +
-      '<div class="hh-item urg"><div class="hh-num">'+(hoyData.minsUrg>0?'1':'0')+'</div><div class="hh-lbl">Urgencias</div></div>';
+      '<div class="hh-item op"><div class="hh-num">'+fmt(totalOp)+'</div><div class="hh-lbl">Total período</div></div>' +
+      '<div class="hh-item ef"><div class="hh-num">'+fmt(totalProd)+'</div><div class="hh-lbl">Efectivas</div></div>' +
+      '<div class="hh-item ext"><div class="hh-num">'+diasTrab+'</div><div class="hh-lbl">Días trab.</div></div>' +
+      '<div class="hh-item urg"><div class="hh-num">'+Math.round(totalUrg/60*10/10)+'</div><div class="hh-lbl">Hs urgencia</div></div>';
   }
 }
 /* ══════════════════════════════════════════════════
