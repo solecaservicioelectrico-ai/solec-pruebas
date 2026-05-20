@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.21</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.22</div>
     </div>
   </div>
 
@@ -678,9 +678,10 @@ body {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="horas-title">📊 Horas</div>
         <div class="horas-filtros">
-          <div class="horas-f on" onclick="event.stopPropagation();cambiarFiltroHoras(7,this)">7d</div>
-          <div class="horas-f" onclick="event.stopPropagation();cambiarFiltroHoras(15,this)">15d</div>
-          <div class="horas-f" onclick="event.stopPropagation();cambiarFiltroHoras(30,this)">Mes</div>
+          <div class="horas-f on" id="hf-7d" onclick="event.stopPropagation();cambiarFiltroHoras(7,this)">7d</div>
+          <div class="horas-f" id="hf-15d" onclick="event.stopPropagation();cambiarFiltroHoras(15,this)">15d</div>
+          <div class="horas-f" id="hf-mes" onclick="event.stopPropagation();cambiarFiltroHoras(30,this)">Mes</div>
+          <div class="horas-f" id="hf-custom" onclick="event.stopPropagation();toggleFiltroCustom()">📅</div>
         </div>
       </div>
       <div class="horas-leyenda">
@@ -688,6 +689,13 @@ body {
         <div class="horas-ley-item"><div class="horas-ley-dot" style="background:var(--verde)"></div>Efectivas</div>
         <div class="horas-ley-item"><div class="horas-ley-dot" style="background:var(--naranja)"></div>Extra</div>
         <div class="horas-ley-item"><div class="horas-ley-dot" style="background:var(--rojo)"></div>Urgencia</div>
+      </div>
+      <!-- Filtro personalizado -->
+      <div id="horas-custom-range" style="display:none;gap:8px;margin-bottom:10px;align-items:center">
+        <input type="date" id="horas-desde" style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:8px;font-size:13px;font-weight:700;color:var(--t);outline:none">
+        <span style="color:var(--t3);font-size:12px;font-weight:700">→</span>
+        <input type="date" id="horas-hasta" style="flex:1;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:8px;font-size:13px;font-weight:700;color:var(--t);outline:none">
+        <div onclick="event.stopPropagation();aplicarFiltroCustom()" style="background:var(--am);border:none;border-radius:var(--rs);padding:8px 12px;font-size:12px;font-weight:800;color:#000;cursor:pointer">OK</div>
       </div>
       <div class="chart-wrap" id="chart-horas">
         <div class="empty-state" style="padding:10px;width:100%"><div class="spinner"></div></div>
@@ -1478,6 +1486,123 @@ function cambiarFiltroHoras(dias, btn) {
   document.querySelectorAll('.horas-f').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
   renderGraficoHoras(dias);
+}
+
+function toggleFiltroCustom() {
+  var cr = document.getElementById('horas-custom-range');
+  if (!cr) return;
+  var visible = cr.style.display !== 'none';
+  cr.style.display = visible ? 'none' : 'flex';
+  if (!visible) {
+    // Set default dates
+    var hoy = new Date();
+    var hace7 = new Date(hoy); hace7.setDate(hoy.getDate()-7);
+    function fd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+    var desdeEl = document.getElementById('horas-desde');
+    var hastaEl = document.getElementById('horas-hasta');
+    if (desdeEl && !desdeEl.value) desdeEl.value = fd(hace7);
+    if (hastaEl && !hastaEl.value) hastaEl.value = fd(hoy);
+  }
+}
+
+function aplicarFiltroCustom() {
+  var desde = document.getElementById('horas-desde').value;
+  var hasta  = document.getElementById('horas-hasta').value;
+  if (!desde || !hasta) return;
+  document.querySelectorAll('.horas-f').forEach(b => b.classList.remove('on'));
+  document.getElementById('hf-custom').classList.add('on');
+  S.filtroCustom = { desde, hasta };
+  renderGraficoHorasCustom(desde, hasta);
+}
+
+function renderGraficoHorasCustom(desde, hasta) {
+  var wrap = document.getElementById('chart-horas');
+  wrap.innerHTML = '';
+
+  function parsearHora(val) {
+    if (!val) return null;
+    var s = String(val).trim();
+    if (s.includes(':')) {
+      var parts = s.split(':');
+      var h = parseInt(parts[0]) || 0;
+      var m = parseInt(parts[1]) || 0;
+      if (h >= 0 && h < 24) return h*60 + m;
+    }
+    var n = parseFloat(s);
+    if (!isNaN(n) && n > 0 && n < 1) return Math.round(n * 24 * 60);
+    return null;
+  }
+
+  var desdeDate = new Date(desde + 'T00:00:00');
+  var hastaDate = new Date(hasta + 'T00:00:00');
+  var diasData = [];
+
+  for (var d = new Date(desdeDate); d <= hastaDate; d.setDate(d.getDate()+1)) {
+    var dStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    var regsDelDia = S.registros.filter(function(r){
+      var f = String(r.Fecha||'').replace(' ','T').split('T')[0].trim();
+      return f === dStr && r.Hora;
+    });
+
+    var minsProd=0, minsUrg=0, primerInicio=null, ultimoFin=null;
+    regsDelDia.forEach(function(r){
+      var inicioMins = parsearHora(r.Hora);
+      if (inicioMins === null) return;
+      if (primerInicio === null || inicioMins < primerInicio) primerInicio = inicioMins;
+      var finMins = parsearHora(r['Hora Fin']||r.HoraFin);
+      var dur = 0;
+      if (finMins !== null && finMins > inicioMins) {
+        dur = finMins - inicioMins;
+        if (ultimoFin === null || finMins > ultimoFin) ultimoFin = finMins;
+      } else {
+        var durStr = String(r['Duración']||r.Duracion||'').trim();
+        if (durStr && durStr !== '—') {
+          var mH = durStr.match(/(\d+)\s*h/i);
+          var mM = durStr.match(/(\d+)\s*m/i);
+          dur = (mH?parseInt(mH[1]):0)*60 + (mM?parseInt(mM[1]):0);
+        }
+        if (dur > 0) ultimoFin = Math.max(ultimoFin||0, inicioMins+dur);
+      }
+      if (dur > 0) {
+        if (String(r['Tipo de Visita']||'').toLowerCase().includes('urgencia')) minsUrg += dur;
+        else minsProd += dur;
+      }
+    });
+    var minsOp = (primerInicio!==null&&ultimoFin!==null) ? ultimoFin-primerInicio : minsProd+minsUrg;
+    diasData.push({ fecha: new Date(d), dStr, minsOp, minsProd, minsExt:Math.max(0,minsOp-540), minsUrg });
+  }
+
+  var maxMins = Math.max(...diasData.map(function(d){return d.minsOp||0;}), 480);
+  var dias7 = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+  diasData.forEach(function(d){
+    var h = function(v){ return v > 0 ? Math.max(3, Math.round((v/maxMins)*78)) : 0; };
+    var grp = document.createElement('div');
+    grp.className = 'bar-group';
+    grp.innerHTML =
+      '<div class="bars">'+
+        '<div class="bar op"  style="height:'+h(d.minsOp)+'px"></div>'+
+        '<div class="bar ef"  style="height:'+h(d.minsProd)+'px"></div>'+
+        '<div class="bar ext" style="height:'+h(d.minsExt)+'px"></div>'+
+        '<div class="bar urg" style="height:'+h(d.minsUrg)+'px"></div>'+
+      '</div>'+
+      '<div class="bar-day">'+dias7[d.fecha.getDay()]+'</div>';
+    wrap.appendChild(grp);
+  });
+
+  var totalOp   = diasData.reduce(function(s,d){return s+d.minsOp;},0);
+  var totalProd = diasData.reduce(function(s,d){return s+d.minsProd;},0);
+  var totalExt  = diasData.reduce(function(s,d){return s+d.minsExt;},0);
+  var diasTrab  = diasData.filter(function(d){return d.minsOp>0;}).length;
+  var fmt = function(m){ if(!m||m<=0)return '0h'; var h=Math.floor(m/60),mn=m%60; return h>0?h+'h'+(mn>0?' '+mn+'m':''):mn+'m'; };
+  var resDiv = document.getElementById('horas-resumen-hoy');
+  if (resDiv) {
+    resDiv.innerHTML =
+      '<div class="hh-item op"><div class="hh-num">'+fmt(totalOp)+'</div><div class="hh-lbl">Total período</div></div>'+
+      '<div class="hh-item ef"><div class="hh-num">'+fmt(totalProd)+'</div><div class="hh-lbl">Efectivas</div></div>'+
+      '<div class="hh-item ext"><div class="hh-num">'+diasTrab+'</div><div class="hh-lbl">Días trab.</div></div>'+
+      '<div class="hh-item urg"><div class="hh-num">'+fmt(totalExt)+'</div><div class="hh-lbl">Extra</div></div>';
+  }
 }
 
 function renderGraficoHoras(dias) {
