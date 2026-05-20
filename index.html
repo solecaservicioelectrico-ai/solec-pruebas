@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.19</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.20</div>
     </div>
   </div>
 
@@ -1523,16 +1523,32 @@ function renderGraficoHoras(dias) {
 
     regsDelDia.forEach(r => {
       const inicioMins = parsearHora(r.Hora);
-      const finMins = parsearHora(r['Hora Fin'] || r.HoraFin);
       if (inicioMins === null) return;
       if (primerInicio === null || inicioMins < primerInicio) primerInicio = inicioMins;
-      if (finMins !== null) {
+
+      const finMins = parsearHora(r['Hora Fin'] || r.HoraFin);
+      let dur = 0;
+
+      if (finMins !== null && finMins > inicioMins) {
+        dur = finMins - inicioMins;
         if (ultimoFin === null || finMins > ultimoFin) ultimoFin = finMins;
-        const dur = finMins - inicioMins;
-        if (dur > 0) {
-          if (String(r['Tipo de Visita']||'').toLowerCase().includes('urgencia')) minsUrg += dur;
-          else minsProd += dur;
+      } else {
+        // Sin hora fin — usar Duración guardada en la Sheet
+        var durStr = String(r['Duración'] || r.Duracion || '').trim();
+        if (durStr) {
+          var mH = durStr.match(/(\d+)\s*h/i);
+          var mM = durStr.match(/(\d+)\s*m/i);
+          var hh = mH ? parseInt(mH[1]) : 0;
+          var mm = mM ? parseInt(mM[1]) : 0;
+          dur = hh*60 + mm;
         }
+        if (dur > 0 && ultimoFin === null) ultimoFin = inicioMins + dur;
+        else if (dur > 0) ultimoFin = Math.max(ultimoFin, inicioMins + dur);
+      }
+
+      if (dur > 0) {
+        if (String(r['Tipo de Visita']||'').toLowerCase().includes('urgencia')) minsUrg += dur;
+        else minsProd += dur;
       }
     });
 
