@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.16</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.17</div>
     </div>
   </div>
 
@@ -1506,7 +1506,7 @@ function renderGraficoHoras(dias) {
     d.setDate(d.getDate() - i);
     const dStr = d.toISOString().split('T')[0];
     const regsDelDia = S.registros.filter(r => {
-      var f = String(r.Fecha || '').split('T')[0];
+      var f = String(r.Fecha || '').replace(' ','T').split('T')[0];
       return f === dStr && r.Hora;
     });
 
