@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.24</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.25</div>
     </div>
   </div>
 
@@ -1602,7 +1602,7 @@ function renderGraficoHorasCustom(desde, hasta) {
     resDiv.innerHTML =
       '<div class="hh-item op"><div class="hh-num">'+fmt(totalOp)+'</div><div class="hh-lbl">Total período</div></div>'+
       '<div class="hh-item ef"><div class="hh-num">'+fmt(totalProd)+'</div><div class="hh-lbl">Efectivas</div></div>'+
-      '<div class="hh-item ext"><div class="hh-num">'+diasTrab+'</div><div class="hh-lbl">Días trab.</div></div>'+
+      '<div class="hh-item ext"><div class="hh-num">'+fmt(totalExt)+'</div><div class="hh-lbl">Extra</div></div>'+
       '<div class="hh-item urg"><div class="hh-num">'+fmt(totalExt)+'</div><div class="hh-lbl">Extra</div></div>';
   }
 }
@@ -1725,7 +1725,7 @@ function renderGraficoHoras(dias) {
     resDiv.innerHTML =
       '<div class="hh-item op"><div class="hh-num">'+fmt(totalOp)+'</div><div class="hh-lbl">Total período</div></div>' +
       '<div class="hh-item ef"><div class="hh-num">'+fmt(totalProd)+'</div><div class="hh-lbl">Efectivas</div></div>' +
-      '<div class="hh-item ext"><div class="hh-num">'+diasTrab+'</div><div class="hh-lbl">Días trab.</div></div>' +
+      '<div class="hh-item ext"><div class="hh-num">'+fmt(totalExt)+'</div><div class="hh-lbl">Extra</div></div>' +
       '<div class="hh-item urg"><div class="hh-num">'+Math.round(totalUrg/60*10/10)+'</div><div class="hh-lbl">Hs urgencia</div></div>';
   }
 }
