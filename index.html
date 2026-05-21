@@ -449,8 +449,8 @@ body {
 .horas-leyenda  { display:flex; gap:10px; margin:10px 0; flex-wrap:wrap; }
 .horas-ley-item { display:flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:var(--t3); }
 .horas-ley-dot  { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
-.chart-wrap { display:flex; align-items:flex-end; gap:4px; height:95px; }
-.bar-group  { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; }
+.chart-wrap { display:flex; align-items:flex-end; gap:3px; height:95px; overflow-x:auto; overflow-y:visible; padding-bottom:2px; scrollbar-width:none; } .chart-wrap::-webkit-scrollbar{display:none;}
+.bar-group  { flex:0 0 auto; min-width:18px; display:flex; flex-direction:column; align-items:center; gap:2px; }
 .bars       { display:flex; gap:2px; align-items:flex-end; height:78px; width:100%; justify-content:center; }
 .bar        { border-radius:3px 3px 0 0; min-height:3px; flex:1; max-width:10px; }
 .bar.op     { background:var(--azul);   opacity:.55; }
@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.22</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.24</div>
     </div>
   </div>
 
@@ -1569,7 +1569,9 @@ function renderGraficoHorasCustom(desde, hasta) {
       }
     });
     var minsOp = (primerInicio!==null&&ultimoFin!==null) ? ultimoFin-primerInicio : minsProd+minsUrg;
-    diasData.push({ fecha: new Date(d), dStr, minsOp, minsProd, minsExt:Math.max(0,minsOp-540), minsUrg });
+    var diaSem = (new Date(dStr+'T00:00:00')).getDay();
+    var JORNADA_DIA = diaSem === 0 ? 0 : diaSem === 6 ? 240 : 540;
+    diasData.push({ fecha: new Date(d), dStr, minsOp, minsProd, minsExt:Math.max(0,minsOp-JORNADA_DIA), minsUrg });
   }
 
   var maxMins = Math.max(...diasData.map(function(d){return d.minsOp||0;}), 480);
@@ -1680,7 +1682,8 @@ function renderGraficoHoras(dias) {
     const minsOp = (primerInicio !== null && ultimoFin !== null)
       ? ultimoFin - primerInicio
       : minsProd + minsUrg;
-    const JORNADA = 540;
+    const diaSemana = d.getDay(); // 0=Dom, 6=Sab
+    const JORNADA = diaSemana === 0 ? 0 : diaSemana === 6 ? 240 : 540;
     const minsExt = Math.max(0, minsOp - JORNADA);
     diasData.push({ fecha: d, dStr, minsOp, minsProd, minsExt, minsUrg, regsN: regsDelDia.length });
   }
