@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.25</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.27</div>
     </div>
   </div>
 
@@ -1305,7 +1305,114 @@ const S = {
 /* ══════════════════════════════════════════════════
    NAVEGACIÓN
    ══════════════════════════════════════════════════ */
-function ir(id) {
+function renderPantallaHoras() {
+  var body = document.querySelector('#pantalla-horas .scroll-body');
+  if (!body) return;
+
+  function parsearHora(val) {
+    if (!val) return null;
+    var s = String(val).trim();
+    if (s.includes(':')) {
+      var p = s.split(':');
+      var h = parseInt(p[0])||0, m = parseInt(p[1])||0;
+      if (h>=0 && h<24) return h*60+m;
+    }
+    return null;
+  }
+  function fmt(m) {
+    if (!m||m<=0) return '0h';
+    var h=Math.floor(m/60), mn=m%60;
+    return h>0 ? h+'h'+(mn>0?' '+mn+'m':'') : mn+'m';
+  }
+  function fechaLocal(d) {
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  // Agrupar registros por fecha
+  var porFecha = {};
+  S.registros.forEach(function(r) {
+    var f = String(r.Fecha||'').replace(' ','T').split('T')[0].trim();
+    if (!f) return;
+    if (!porFecha[f]) porFecha[f] = [];
+    porFecha[f].push(r);
+  });
+
+  var fechas = Object.keys(porFecha).sort(function(a,b){return b.localeCompare(a);});
+
+  if (!fechas.length) {
+    body.innerHTML = '<div class="empty-state"><div class="empty-title">Sin registros</div></div>';
+    return;
+  }
+
+  var html = '';
+  fechas.forEach(function(f) {
+    var regs = porFecha[f];
+    var d = new Date(f+'T00:00:00');
+    var dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var nombreDia = dias[d.getDay()];
+    var fechaStr = nombreDia+' '+d.getDate()+' de '+meses[d.getMonth()];
+    var diaSem = d.getDay();
+    var JORNADA = diaSem===0?0:diaSem===6?240:540;
+
+    var primerInicio=null, ultimoFin=null, minsProd=0, minsUrg=0;
+    regs.forEach(function(r) {
+      var ini = parsearHora(r.Hora);
+      var fin = parsearHora(r['Hora Fin']||r.HoraFin);
+      if (ini===null) return;
+      if (primerInicio===null||ini<primerInicio) primerInicio=ini;
+      var dur=0;
+      if (fin!==null&&fin>ini) {
+        dur=fin-ini;
+        if (ultimoFin===null||fin>ultimoFin) ultimoFin=fin;
+      } else {
+        var durStr=String(r['Duración']||r.Duracion||'').trim();
+        if (durStr&&durStr!=='—') {
+          var mH=durStr.match(/(\d+)\s*h/i), mM=durStr.match(/(\d+)\s*m/i);
+          dur=(mH?parseInt(mH[1]):0)*60+(mM?parseInt(mM[1]):0);
+        }
+        if (dur>0) ultimoFin=Math.max(ultimoFin||0, ini+dur);
+      }
+      if (dur>0) {
+        var tv=String(r['Tipo de Visita']||'').toLowerCase();
+        if (tv.includes('urgencia')&&tv.includes('fuera')) minsUrg+=dur;
+        else minsProd+=dur;
+      }
+    });
+
+    var minsOp=(primerInicio!==null&&ultimoFin!==null)?ultimoFin-primerInicio:minsProd+minsUrg;
+    var minsExt=Math.max(0,minsOp-JORNADA);
+    var esFinSemana=diaSem===0||diaSem===6;
+
+    html += '<div style="background:var(--s1);border:1px solid var(--borde);border-left:4px solid '+(esFinSemana?'var(--am)':'var(--verde)')+';border-radius:12px;margin-bottom:10px;overflow:hidden">';
+    // Header jornada
+    html += '<div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">';
+    html += '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--t)">'+fechaStr+'</div>';
+    html += '<div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:2px">'+regs.length+' registro'+(regs.length>1?'s':'')+' · '+(primerInicio!==null?Math.floor(primerInicio/60)+':'+String(primerInicio%60).padStart(2,'0')+'hs':'—')+(ultimoFin!==null?' → '+Math.floor(ultimoFin/60)+':'+String(ultimoFin%60).padStart(2,'0')+'hs':'')+'</div></div>';
+    html += '<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;color:'+(esFinSemana?'var(--am)':'var(--verde)')+'">'+fmt(minsOp)+'</div>';
+    if (minsExt>0) html += '<div style="font-size:11px;font-weight:800;color:var(--naranja)">+'+fmt(minsExt)+' extra</div>';
+    if (minsUrg>0) html += '<div style="font-size:11px;font-weight:800;color:var(--rojo)">🚨 '+fmt(minsUrg)+' urgencia</div>';
+    html += '</div></div>';
+
+    // Registros del día
+    regs.forEach(function(r) {
+      var ini=parsearHora(r.Hora), fin=parsearHora(r['Hora Fin']||r.HoraFin);
+      var iniStr=ini!==null?Math.floor(ini/60)+':'+String(ini%60).padStart(2,'0')+'hs':'—';
+      var finStr=fin!==null?Math.floor(fin/60)+':'+String(fin%60).padStart(2,'0')+'hs':'—';
+      var tv=String(r['Tipo de Visita']||'');
+      var esUrg=tv.toLowerCase().includes('urgencia');
+      html += '<div style="padding:8px 14px;border-top:1px solid rgba(74,82,120,.25);display:flex;align-items:center;gap:10px">';
+      html += '<div style="font-size:11px;color:var(--t3);font-weight:700;flex-shrink:0">'+iniStr+(finStr!=='—'?' → '+finStr:'')+'</div>';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.Edificio||'—')+'</div>';
+      html += '<div style="font-size:11px;color:'+(esUrg?'var(--rojo)':'var(--t3)')+';font-weight:600">'+tv+'</div></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+}
+
   const anterior = document.getElementById(S.pantallaActual);
   const siguiente = document.getElementById(id);
   if (!siguiente) return;
@@ -1316,6 +1423,9 @@ function ir(id) {
   // Acciones al entrar a una pantalla
   if (id === 'pantalla-nuevo-registro') {
     abrirNuevoRegistro();
+  }
+  if (id === 'pantalla-horas') {
+    renderPantallaHoras();
   }
 }
 
@@ -1564,7 +1674,8 @@ function renderGraficoHorasCustom(desde, hasta) {
         if (dur > 0) ultimoFin = Math.max(ultimoFin||0, inicioMins+dur);
       }
       if (dur > 0) {
-        if (String(r['Tipo de Visita']||'').toLowerCase().includes('urgencia')) minsUrg += dur;
+        var tvr = String(r['Tipo de Visita']||'').toLowerCase();
+        if (tvr.includes('urgencia') && tvr.includes('fuera')) minsUrg += dur;
         else minsProd += dur;
       }
     });
@@ -1674,7 +1785,8 @@ function renderGraficoHoras(dias) {
       }
 
       if (dur > 0) {
-        if (String(r['Tipo de Visita']||'').toLowerCase().includes('urgencia')) minsUrg += dur;
+        var tvr = String(r['Tipo de Visita']||'').toLowerCase();
+        if (tvr.includes('urgencia') && tvr.includes('fuera')) minsUrg += dur;
         else minsProd += dur;
       }
     });
