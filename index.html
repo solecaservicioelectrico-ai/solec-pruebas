@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.27</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.28</div>
     </div>
   </div>
 
@@ -1384,7 +1384,8 @@ function renderPantallaHoras() {
     var minsExt=Math.max(0,minsOp-JORNADA);
     var esFinSemana=diaSem===0||diaSem===6;
 
-    html += '<div style="background:var(--s1);border:1px solid var(--borde);border-left:4px solid '+(esFinSemana?'var(--am)':'var(--verde)')+';border-radius:12px;margin-bottom:10px;overflow:hidden">';
+    var borderColor = esFinSemana ? 'var(--am)' : 'var(--verde)';
+    html += '<div style="background:var(--s1);border:1px solid var(--borde);border-left:4px solid '+borderColor+';border-radius:12px;margin-bottom:10px;overflow:hidden">';
     // Header jornada
     html += '<div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">';
     html += '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--t)">'+fechaStr+'</div>';
@@ -1413,6 +1414,7 @@ function renderPantallaHoras() {
   body.innerHTML = html;
 }
 
+function ir(id) {
   const anterior = document.getElementById(S.pantallaActual);
   const siguiente = document.getElementById(id);
   if (!siguiente) return;
