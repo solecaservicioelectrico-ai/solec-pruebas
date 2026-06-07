@@ -37,8 +37,8 @@ body {
   background: var(--bg);
   color: var(--t);
   font-family: 'Barlow', sans-serif;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   min-height: 100vh;
   max-width: 430px;
   margin: 0 auto;
@@ -366,7 +366,7 @@ body {
   flex:1; border-radius:var(--rs); padding:12px 8px; text-align:center;
   border:1px solid var(--borde); background:var(--s2);
 }
-.sem-num   { font-family:'Bebas Neue',sans-serif; font-size:46px; line-height:1; }
+.sem-num   { font-family:'Bebas Neue',sans-serif; font-size:52px; line-height:1; }
 .sem-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--t3); margin-top:3px; }
 .sem-item.rojo    { border-color:rgba(255,71,87,.4);  background:rgba(255,71,87,.08); }
 .sem-item.naranja { border-color:rgba(255,140,66,.4); background:rgba(255,140,66,.08);}
@@ -557,10 +557,9 @@ body {
 
 
 /* ── TEMAS ── */
-body.tema-oscuro { --bg:#0f1015;--s1:#161820;--s2:#1e2130;--s3:#272b40;--borde:#4a5278;--am:#f5c518;--verde:#00c896;--rojo:#ff4757;--azul:#4a9eff;--t:#fff;--t2:#dde4ff;--t3:#9aa5c8; }
-body.tema-calido  { --bg:#110e0a;--s1:#1a1510;--s2:#231c14;--s3:#2e2418;--borde:#5a4a30;--am:#f5a623;--verde:#c8a050;--rojo:#ff6b4a;--azul:#c8845a;--t:#f5ead8;--t2:#e8d5b0;--t3:#a09070; }
-body.tema-claro   { --bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0e8;--borde:#c0c8d8;--am:#d4900a;--verde:#007a5e;--rojo:#cc2233;--azul:#2060bb;--t:#1a1f2e;--t2:#2a3040;--t3:#6070a0; }
-body.tema-contrast{ --bg:#000000;--s1:#0a0a0a;--s2:#111111;--s3:#1a1a1a;--borde:#444444;--am:#ffdd00;--verde:#00ff88;--rojo:#ff3333;--azul:#44aaff;--t:#ffffff;--t2:#eeeeee;--t3:#aaaaaa; }
+body.tema-noche  { --bg:#1E2228;--s1:#262D36;--s2:#2F3740;--s3:#38424D;--borde:#4A5568;--am:#F5C518;--verde:#38A169;--rojo:#E53E3E;--azul:#3B8BEB;--t:#E8EDF2;--t2:#C8D3DC;--t3:#8A9BB0; }
+body.tema-dia    { --bg:#F5F0E8;--s1:#FFFFFF;--s2:#EDE8DE;--s3:#DDD8CE;--borde:#B8B0A0;--am:#D4580A;--verde:#276749;--rojo:#C53030;--azul:#2060BB;--t:#1A1A1A;--t2:#3A3A3A;--t3:#5C5C5C; }
+body.tema-calido { --bg:#2C2420;--s1:#3A2E28;--s2:#463830;--s3:#524238;--borde:#6B5040;--am:#C87840;--verde:#8B6F47;--rojo:#CC4A30;--azul:#A07050;--t:#F0E0C8;--t2:#D8C8A8;--t3:#A89880; }
 
 /* Modal temas */
 .tema-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:flex-end;justify-content:center}
@@ -610,7 +609,7 @@ body.tema-contrast{ --bg:#000000;--s1:#0a0a0a;--s2:#111111;--s3:#1a1a1a;--borde:
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.31</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.32</div>
       <div onclick="abrirTemas()" style="font-size:18px;cursor:pointer;margin-top:4px" title="Cambiar tema">🎨</div>
     </div>
   </div>
@@ -3459,7 +3458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── TEMAS ──
-var TEMAS = ['oscuro','calido','claro','contrast'];
+var TEMAS = ['noche','dia','calido'];
 function aplicarTema(tema) {
   document.body.className = '';
   TEMAS.forEach(function(t){ document.body.classList.remove('tema-'+t); });
@@ -3477,7 +3476,7 @@ function cerrarTemas() {
 }
 // Aplicar tema guardado al cargar
 (function(){
-  var saved = localStorage.getItem('solec_tema') || 'oscuro';
+  var saved = localStorage.getItem('solec_tema') || 'noche';
   aplicarTema(saved);
 })();
 </script>
@@ -3487,21 +3486,20 @@ function cerrarTemas() {
   <div class="tema-modal">
     <div class="tema-modal-title">🎨 Estilo visual</div>
     <div class="tema-grid">
-      <div class="tema-opt" id="tema-opt-oscuro" onclick="aplicarTema('oscuro')">
-        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#0f1015,#1e2130)"></div>
-        <div class="tema-opt-label" style="color:#fff">🌙 Oscuro</div>
+      <div class="tema-opt" id="tema-opt-noche" onclick="aplicarTema('noche')">
+        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#1E2228,#2F3740)"></div>
+        <div class="tema-opt-label" style="color:#E8EDF2;font-size:15px;font-weight:800">🌙 Noche</div>
+        <div style="font-size:11px;color:#8A9BB0;text-align:center;margin-top:3px">Modo oscuro frío</div>
       </div>
-      <div class="tema-opt" id="tema-opt-calido" onclick="aplicarTema('calido')">
-        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#110e0a,#231c14)"></div>
-        <div class="tema-opt-label" style="color:#f5ead8">🕯️ Cálido</div>
+      <div class="tema-opt" id="tema-opt-dia" onclick="aplicarTema('dia')">
+        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#F5F0E8,#FFFFFF)"></div>
+        <div class="tema-opt-label" style="color:#1A1A1A;font-size:15px;font-weight:800">☀️ Día</div>
+        <div style="font-size:11px;color:#5C5C5C;text-align:center;margin-top:3px">Alto contraste solar</div>
       </div>
-      <div class="tema-opt" id="tema-opt-claro" onclick="aplicarTema('claro')">
-        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#f0f2f5,#ffffff)"></div>
-        <div class="tema-opt-label" style="color:#1a1f2e">☀️ Claro</div>
-      </div>
-      <div class="tema-opt" id="tema-opt-contrast" onclick="aplicarTema('contrast')">
-        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#000,#111)"></div>
-        <div class="tema-opt-label" style="color:#fff">⚡ Alto contraste</div>
+      <div class="tema-opt" id="tema-opt-calido" onclick="aplicarTema('calido')" style="grid-column:1/-1">
+        <div class="tema-opt-preview" style="background:linear-gradient(135deg,#2C2420,#463830);height:32px"></div>
+        <div class="tema-opt-label" style="color:#F0E0C8;font-size:15px;font-weight:800">🕯️ Cálido</div>
+        <div style="font-size:11px;color:#A89880;text-align:center;margin-top:3px">Tonos tierra · menos fatiga visual</div>
       </div>
     </div>
   </div>
