@@ -37,8 +37,7 @@ body {
   background: var(--bg);
   color: var(--t);
   font-family: 'Barlow', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 16px;
   min-height: 100vh;
   max-width: 430px;
   margin: 0 auto;
@@ -322,7 +321,7 @@ body {
 .fab:active { transform: scale(.95); }
 .fab-label {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 17px;
+  font-size: 15px;
   letter-spacing: 1.5px;
   color: #fff;
 }
@@ -359,14 +358,14 @@ body {
 }
 .prev-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
 .prev-icon { font-size:28px; }
-.prev-title { font-family:'Bebas Neue',sans-serif; font-size:27px; letter-spacing:2px; color:var(--am); }
+.prev-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; color:var(--am); }
 .prev-sub   { font-size:11px; color:var(--t3); font-weight:600; }
 .prev-sem   { display:flex; gap:10px; }
 .sem-item   {
   flex:1; border-radius:var(--rs); padding:12px 8px; text-align:center;
   border:1px solid var(--borde); background:var(--s2);
 }
-.sem-num   { font-family:'Bebas Neue',sans-serif; font-size:60px; line-height:1; }
+.sem-num   { font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:1; }
 .sem-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--t3); margin-top:3px; }
 .sem-item.rojo    { border-color:rgba(255,71,87,.4);  background:rgba(255,71,87,.08); }
 .sem-item.naranja { border-color:rgba(255,140,66,.4); background:rgba(255,140,66,.08);}
@@ -555,28 +554,6 @@ body {
 .empty-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; color:var(--t3); margin-bottom:6px; }
 .empty-sub   { font-size: 13px; font-weight: 600; }
 
-
-/* ── TEMAS ── */
-body.tema-noche {
-  --bg:#1C1C1E; --s1:#2C2C2E; --s2:#3A3A3C; --s3:#48484A;
-  --borde:#555558; --am:#FFD60A; --verde:#30D158; --rojo:#FF453A; --azul:#0A84FF;
-  --t:#FFFFFF; --t2:#EBEBF5; --t3:#AEAEB2;
-}
-body.tema-dia {
-  --bg:#FFFFFF; --s1:#FFFFFF; --s2:#F2F2F7; --s3:#E5E5EA;
-  --borde:#000000; --am:#E65000; --verde:#1A7F3C; --rojo:#CC0000; --azul:#0040CC;
-  --t:#000000; --t2:#111111; --t3:#444444;
-}
-
-/* Modal temas */
-.tema-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:flex-end;justify-content:center}
-.tema-modal{background:var(--s1);border-top:3px solid var(--am);border-radius:20px 20px 0 0;padding:24px 16px 44px;width:100%;max-width:430px}
-.tema-modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--am);margin-bottom:16px}
-.tema-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tema-opt{border-radius:12px;padding:14px;cursor:pointer;border:2px solid transparent;transition:all .2s}
-.tema-opt.activo{border-color:var(--am)}
-.tema-opt-preview{height:40px;border-radius:8px;margin-bottom:8px}
-.tema-opt-label{font-size:16px;font-weight:900;text-align:center}
 </style>
 </head>
 <body>
@@ -616,8 +593,7 @@ body.tema-dia {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.34</div>
-      <div onclick="abrirTemas()" style="font-size:18px;cursor:pointer;margin-top:4px" title="Cambiar tema">🎨</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.28</div>
     </div>
   </div>
 
@@ -3463,48 +3439,6 @@ async function cargarDatos() {
 document.addEventListener('DOMContentLoaded', () => {
   cargarDatos();
 });
-
-// ── TEMAS ──
-var TEMAS = ['noche','dia'];
-function aplicarTema(tema) {
-  document.body.className = '';
-  TEMAS.forEach(function(t){ document.body.classList.remove('tema-'+t); });
-  document.body.classList.add('tema-'+tema);
-  localStorage.setItem('solec_tema', tema);
-  document.querySelectorAll('.tema-opt').forEach(function(el){ el.classList.remove('activo'); });
-  var opt = document.getElementById('tema-opt-'+tema);
-  if (opt) opt.classList.add('activo');
-}
-function abrirTemas() {
-  document.getElementById('temaModal').style.display = 'flex';
-}
-function cerrarTemas() {
-  document.getElementById('temaModal').style.display = 'none';
-}
-// Aplicar tema guardado al cargar
-(function(){
-  var saved = localStorage.getItem('solec_tema') || 'noche';
-  aplicarTema(saved);
-})();
 </script>
-
-<!-- MODAL TEMAS -->
-<div class="tema-modal-overlay" id="temaModal" style="display:none" onclick="if(event.target===this)cerrarTemas()">
-  <div class="tema-modal">
-    <div class="tema-modal-title">🎨 Estilo visual</div>
-    <div class="tema-grid">
-      <div class="tema-opt" id="tema-opt-noche" onclick="aplicarTema('noche');cerrarTemas()">
-        <div class="tema-opt-preview" style="background:#1C1C1E;border:1px solid #555"></div>
-        <div class="tema-opt-label" style="color:#FFFFFF;font-size:16px;font-weight:900">🌙 Noche</div>
-        <div style="font-size:13px;color:#AEAEB2;text-align:center;margin-top:4px;font-weight:600">Fondo oscuro · texto blanco</div>
-      </div>
-      <div class="tema-opt" id="tema-opt-dia" onclick="aplicarTema('dia');cerrarTemas()">
-        <div class="tema-opt-preview" style="background:#FFFFFF;border:1px solid #C7C7CC"></div>
-        <div class="tema-opt-label" style="color:#000000;font-size:16px;font-weight:900">☀️ Día</div>
-        <div style="font-size:13px;color:#6D6D72;text-align:center;margin-top:4px;font-weight:600">Fondo blanco · texto negro</div>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
