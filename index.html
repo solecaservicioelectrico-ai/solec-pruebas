@@ -593,7 +593,7 @@ body {
     <div class="hdr-right">
       <div class="hdr-name">Mario</div>
       <div class="hdr-fecha" id="dash-fecha">—</div>
-      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.29</div>
+      <div style="font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1px">v4.30</div>
     </div>
   </div>
 
@@ -1277,7 +1277,7 @@ body {
 /* ── CONFIGURACIÓN ── */
 const AS_URL    = 'https://script.google.com/macros/s/AKfycbxbWMbr2UGRLU-sfp7gb0iaTD8cWYygQF9zlCu7rTCAKM9w-PgskmzYe-UAy1h7bB0i/exec';
 const SHEET_ID  = '1_mdPWn8is6saLnSBitfkwlIfrgiUyWbglJ8u2EjgSUI';
-const VERSION   = 'v4.29';
+const VERSION   = 'v4.30';
 
 /* ── ESTADO GLOBAL ── */
 const S = {
@@ -1616,7 +1616,11 @@ function nn(s) {
    FECHA Y HORA
    ══════════════════════════════════════════════════ */
 function fechaHoy() {
-  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day; // Fecha local, no UTC
 }
 
 function fechaLegible(fecha) {
@@ -3685,7 +3689,11 @@ function nn(s) {
    FECHA Y HORA
    ══════════════════════════════════════════════════ */
 function fechaHoy() {
-  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day; // Fecha local, no UTC
 }
 
 function fechaLegible(fecha) {
